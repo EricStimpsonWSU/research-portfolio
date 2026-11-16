@@ -18,11 +18,11 @@
 fetch('examples.json').then(r=>r.json()).then(xs=>{
  xs=xs.filter(x=>x.status!=='retired');
  const g=document.getElementById('g'),f=document.getElementById('f');
- const draw=m=>{g.innerHTML='';xs.filter(x=>!m||x.method===m).forEach(x=>{
+ const draw=m=>{g.innerHTML='';xs.filter(x=>!m||(x.tags||[]).includes(m)).forEach(x=>{
   const be=[...new Set(x.variants.filter(v=>v.status==='active').map(v=>v.model))];
   g.insertAdjacentHTML('beforeend',`<a class="c" href="${x.href}">${x.thumb?`<img src="${x.thumb}" alt="" loading="lazy">`:''}
    <h3>${x.title}</h3><p>${x.blurb}</p><div class="t"><span class="b">${x.method}</span>${x.runtime}${be.length?' · models: '+be.join(', '):''}</div></a>`)})};
- const ms=[...new Set(xs.map(x=>x.method))];
+ const ms=[...new Set(xs.flatMap(x=>x.tags||[]))];
  [''].concat(ms).forEach(m=>{const b=document.createElement('button');b.textContent=m||'All';
   b.onclick=()=>{[...f.children].forEach(c=>c.classList.remove('on'));b.classList.add('on');draw(m)};f.append(b)});
  f.firstChild.classList.add('on');draw('');
