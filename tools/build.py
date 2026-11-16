@@ -2,6 +2,7 @@
 
 usage: python tools/build.py            # validate + write examples.json
        python tools/build.py --usage    # also print model -> examples (reverse links)
+Card order: optional integer meta.order (smaller first; unset sorts last), ties by folder name.
 Stdlib only (Python >= 3.11).
 """
 import json, sys, tomllib
@@ -20,6 +21,7 @@ def check(d, folder):
     for k in ("title", "status"):
         if not m.get(k): e.append(f"meta.{k} missing")
     if m.get("status") not in STATUS: e.append(f"meta.status {m.get('status')!r}")
+    if "order" in m and (type(m["order"]) is not int): e.append(f"meta.order {m['order']!r} not an integer")
     if x.get("runtime") not in RUNTIME: e.append(f"example.runtime {x.get('runtime')!r}")
     for k in ("method", "entry", "blurb"):
         if not x.get(k): e.append(f"example.{k} missing")
@@ -44,6 +46,8 @@ def main():
                       "thumb": f"examples/{f.parent.name}/{thumb}" if thumb and (f.parent / thumb).exists() else "",
                       "variants": d.get("variants", [])})
     if bad: sys.exit(f"{bad} example(s) invalid")
+    # gallery order: meta.order ascending (unset = last), then folder name
+    items.sort(key=lambda it: (it.get("order", float("inf")), it["name"]))
     (ROOT / "examples.json").write_text(json.dumps(items, indent=1), "utf8")
     print(f"ok: {len(items)} examples -> examples.json")
     if "--usage" in sys.argv:

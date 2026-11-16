@@ -1,5 +1,6 @@
 [meta]
 name   = "pfc-quench-binary"
+order  = 100
 title  = "Binary PFC: quench with adjustable species coupling"
 status = "active"
 tags   = ["PFC", "binary", "solidification", "spectral", "interactive"]

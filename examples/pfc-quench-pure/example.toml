@@ -1,5 +1,6 @@
 [meta]
 name   = "pfc-quench-pure"
+order  = 10
 title  = "Pure PFC: crystallization after a hot quench"
 status = "active"
 tags   = ["PFC", "solidification", "spectral", "interactive"]
