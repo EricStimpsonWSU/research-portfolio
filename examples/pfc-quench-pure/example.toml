@@ -1,0 +1,59 @@
+[meta]
+name   = "pfc-quench-pure"
+title  = "Pure PFC: crystallization after a hot quench"
+status = "active"
+tags   = ["PFC", "solidification", "spectral", "interactive"]
+
+[example]
+method  = "PFC"
+runtime = "browser-js"
+entry   = "index.html"
+thumb   = "thumb.webp"
+blurb   = "Single-species PFC quenched from a hot liquid; grains nucleate, impinge and coarsen. Paint to reheat."
+default_variant = 0
+
+[provenance]
+reference = "reference/philox.py"
+notes     = "Noise is Philox4x32-10, bit-identical to reference/philox.py."
+
+[[variants]]
+model     = "stdpfc"
+backend   = "webgpu"
+precision = "float32"
+catalogue = "stdpfc"
+status    = "active"
+
+[[variants]]
+model     = "stdpfc"
+backend   = "js-cpu"
+precision = "float32"
+catalogue = "stdpfc_cpu"
+status    = "active"
+
+[[variants]]
+model     = "stdpfc"
+backend   = "js-cpu"
+precision = "float64"
+catalogue = "stdpfc_cpu"
+status    = "active"
+
+[[variants]]
+model     = "logpfc"
+backend   = "webgpu"
+precision = "float32"
+catalogue = "logpfc"
+status    = "planned"
+
+[[variants]]
+model     = "logpfc"
+backend   = "js-cpu"
+precision = "float64"
+catalogue = "logpfc_cpu"
+status    = "planned"
+
+[[variants]]
+model     = "loghydro"
+backend   = "webgpu"
+precision = "float32"
+catalogue = "loghydro"
+status    = "planned"

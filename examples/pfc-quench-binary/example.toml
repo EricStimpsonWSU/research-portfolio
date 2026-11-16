@@ -1,0 +1,37 @@
+[meta]
+name   = "pfc-quench-binary"
+title  = "Binary PFC: quench with adjustable species coupling"
+status = "active"
+tags   = ["PFC", "binary", "solidification", "spectral", "interactive"]
+
+[example]
+method  = "PFC"
+runtime = "browser-js"
+entry   = "index.html"
+thumb   = "thumb.webp"
+blurb   = "Two-species PFC after a quench; tune the coupling between the density fields and watch crystallization and demixing compete."
+default_variant = 0
+
+[provenance]
+notes = "No pfc-models catalogue entry for binary PFC yet; catalogue fields left empty."
+
+[[variants]]
+model     = "binarypfc"
+backend   = "webgpu"
+precision = "float32"
+catalogue = ""
+status    = "active"
+
+[[variants]]
+model     = "binarypfc"
+backend   = "js-cpu"
+precision = "float32"
+catalogue = ""
+status    = "active"
+
+[[variants]]
+model     = "binarypfc"
+backend   = "js-cpu"
+precision = "float64"
+catalogue = ""
+status    = "active"

@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Phase-field crystal after a hot quench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#EEF1F4; --surface:#FFFFFF; --ink:#1B2733; --muted:#5B6B7A;
+  --line:#C9D2DB; --accent:#2E6F95; --accent-ink:#FFFFFF; --warn:#A63D2A;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141B22; --surface:#1C252E; --ink:#E4EAF0; --muted:#8FA0B0;
+    --line:#2C3946; --accent:#6FB3D9; --accent-ink:#0F1A22; --warn:#E08A72;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141B22; --surface:#1C252E; --ink:#E4EAF0; --muted:#8FA0B0;
+  --line:#2C3946; --accent:#6FB3D9; --accent-ink:#0F1A22; --warn:#E08A72;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 36px;
+  display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
+@media (max-width:880px){main{grid-template-columns:minmax(0,1fr);gap:20px}}
+h1{font-size:1.6rem;line-height:1.15;font-weight:600;margin:0 0 4px;letter-spacing:-0.01em}
+.lede{margin:0 0 14px;color:var(--muted);max-width:62ch}
+.field{position:relative;width:100%;max-width:calc(100svh - 170px);min-width:260px;
+  touch-action:none;cursor:crosshair;border-radius:6px;overflow:hidden;background:#0E1A3A}
+@media (max-width:880px){.field{max-width:none}}
+.field canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;image-rendering:auto}
+.readout{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px 16px;margin:12px 0 0;
+  max-width:calc(100svh - 170px)}
+@media (max-width:880px){.readout{max-width:none;grid-template-columns:repeat(3,minmax(0,1fr))}}
+.readout div{min-width:0}
+.readout dt{font-size:12px;color:var(--muted)}
+.readout dd{margin:0;font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note{margin:10px 0 0;font-size:13px;color:var(--warn);min-height:1em;max-width:62ch}
+.controls{display:flex;flex-direction:column;gap:14px}
+.actions{display:flex;gap:8px}
+button{font:inherit;font-weight:500;padding:9px 14px;border-radius:6px;cursor:pointer;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);flex:1}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+fieldset{border:1px solid var(--line);border-radius:6px;margin:0;padding:8px 12px 12px;background:var(--surface)}
+legend{font-size:13px;font-weight:600;color:var(--muted);padding:0 4px}
+.ctl{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:0 8px;margin-top:8px}
+.ctl span{font-size:14px}
+.ctl output{font-size:14px;font-weight:500}
+.ctl input[type=range]{grid-column:1/-1;width:100%;margin:4px 0 0;accent-color:var(--accent)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;font-size:14px}
+select{font:inherit;font-size:14px;padding:4px 6px;border-radius:5px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.radios{display:flex;flex-direction:column;gap:4px;margin-top:10px;font-size:14px}
+.radios label{display:flex;gap:6px;align-items:center}
+.radios input{accent-color:var(--accent);margin:0}
+.seedbox{display:flex;gap:6px;align-items:center}
+.seedbox input{width:8.5em;font:inherit;font-size:14px;padding:4px 6px;border-radius:5px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.seedbox button{padding:4px 10px;font-size:14px}
+details{font-size:14px;color:var(--ink)}
+summary{cursor:pointer;font-weight:500}
+details p{margin:8px 0 0;color:var(--muted);line-height:1.55}
+.eq{color:var(--ink)}
+</style>
+</head>
+<body>
+<main>
+  <section>
+    <h1>Phase-field crystal after a hot quench</h1>
+    <p class="lede">Uniform noise relaxing under conserved PFC dynamics. Drag on the field to reheat a patch.</p>
+    <div class="field" id="field"><canvas id="cv" width="256" height="256" aria-label="Density field ψ"></canvas></div>
+    <dl class="readout">
+      <div><dt>Time</dt><dd id="o-t">0</dd></div>
+      <div><dt>Steps per second</dt><dd id="o-sps">0</dd></div>
+      <div><dt>Stabilizer C</dt><dd id="o-c">0</dd></div>
+      <div><dt>Max |ψ|</dt><dd id="o-m">0</dd></div>
+      <div><dt>Engine</dt><dd id="o-e">Starting</dd></div>
+    </dl>
+    <p class="note" id="note" role="status"></p>
+  </section>
+
+  <aside class="controls">
+    <div class="actions">
+      <button class="primary" id="b-quench">Quench again</button>
+      <button id="b-pause">Pause</button>
+    </div>
+
+    <fieldset>
+      <legend>Model</legend>
+      <label class="ctl"><span>Undercooling r</span><output id="v-r"></output>
+        <input type="range" id="r" min="-0.6" max="-0.02" step="0.01" value="-0.25"></label>
+      <label class="ctl"><span>Mean density ψ̄</span><output id="v-pb"></output>
+        <input type="range" id="pb" min="-0.6" max="0.1" step="0.01" value="-0.25"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Quench</legend>
+      <label class="ctl"><span>Noise amplitude</span><output id="v-amp"></output>
+        <input type="range" id="amp" min="0.1" max="2" step="0.05" value="1"></label>
+      <label class="ctl"><span>Reheat strength</span><output id="v-heat"></output>
+        <input type="range" id="heat" min="0.1" max="1.5" step="0.05" value="0.8"></label>
+      <div class="row"><label for="seed">Seed</label>
+        <span class="seedbox"><input type="number" id="seed" min="0" max="4294967295" step="1" inputmode="numeric" value="12345"><button id="b-seed" type="button">New seed</button></span></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Integrator</legend>
+      <label class="ctl"><span>Time step Δt</span><output id="v-dt"></output>
+        <input type="range" id="dt" min="0.05" max="3" step="0.05" value="0.5"></label>
+      <label class="ctl"><span>Steps per frame</span><output id="v-spf"></output>
+        <input type="range" id="spf" min="1" max="60" step="1" value="8"></label>
+      <div class="radios" role="radiogroup" aria-label="Linear operator">
+        <label><input type="radio" name="op" value="fd" checked> 7×7 stencil symbol</label>
+        <label><input type="radio" name="op" value="sp"> Exact spectral symbol</label>
+      </div>
+      <div class="row"><label for="grid">Grid</label>
+        <select id="grid">
+          <option value="128">128 × 128</option>
+          <option value="256" selected>256 × 256</option>
+          <option value="512">512 × 512</option>
+          <option value="1024">1024 × 1024</option>
+        </select></div>
+      <div class="row"><label for="engine">Engine</label>
+        <select id="engine">
+          <option value="gpu32" selected>GPU f32 (WebGPU)</option>
+          <option value="cpu32">CPU f32</option>
+          <option value="cpu64">CPU f64</option>
+        </select></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Display</legend>
+      <label class="ctl"><span>Color range around ψ̄</span><output id="v-range"></output>
+        <input type="range" id="range" min="0.2" max="1.5" step="0.05" value="0.7"></label>
+    </fieldset>
+
+    <details>
+      <summary>How it steps</summary>
+      <p><span class="eq">∂ψ/∂t = ∇²[(r + (1+∇²)²)ψ + ψ³]</span>, grid spacing π/4, periodic.</p>
+      <p>Each step: ψ = F⁻¹ψ̂, g = ψ³ − Cψ, then ψ̂ ← Eψ̂ + Φ·Fg, with L = −K²(r + (1−K²)² + C), E = e<sup>LΔt</sup>, Φ = −K²(e<sup>LΔt</sup>−1)/L. That’s first-order exponential time differencing (ETD1).</p>
+      <p>K² is the Fourier symbol of the isotropic 9-point Laplacian, so the linear operator is exactly the 7×7 stencil, applied diagonally in Fourier space.</p>
+      <p>E, Φ and the FFT twiddles are computed in double precision (expm1 for small LΔt) and uploaded as f32. The state lives in Fourier space and Φ vanishes at k = 0, so the mean density is preserved exactly.</p>
+      <p>The cubic term is explicit; C is the linear stabilizer moved between the two sides. It’s set from the measured max ψ² so the frozen-coefficient amplification stays below one. Steady states don’t depend on C.</p>
+      <p>Noise is Philox4x32-10 keyed by (seed, stream), with stream 0 for the quench and stream 1 for reheat strokes, counter (cell, stroke) and u = (word₀ ≫ 8)·2⁻²⁴. philox.py reproduces it exactly. The same seed and the same strokes give the same run.</p>
+      <p>GPU f32 is f32 throughout. CPU f32 stores in f32 but does arithmetic in double. CPU f64 is double throughout. WebGPU has no f64.</p>
+    </details>
+  </aside>
+</main>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const DX = Math.PI / 4;
+const S = { N:256, r:-0.25, psibar:-0.25, A:1.0, brushAmp:0.8, dt:0.5, spf:8, range:0.7,
+            fd:true, paused:false, engine:'gpu32', seed:12345 };
+const BRUSH_R = 9 / DX; // cells
+
+/* ---------- Philox4x32-10 (Random123), matches philox.py ---------- */
+const PH_M0=0xD2511F53, PH_M1=0xCD9E8D57, PH_W0=0x9E3779B9, PH_W1=0xBB67AE85, TWO_M24=5.9604644775390625e-8;
+function mulhi32(a,b){
+  const a0=a&0xffff, a1=a>>>16, b0=b&0xffff, b1=b>>>16;
+  const p00=a0*b0, p01=a0*b1, p10=a1*b0, p11=a1*b1;
+  const mid=(p00>>>16)+(p01&0xffff)+(p10&0xffff);
+  return (p11+(p01>>>16)+(p10>>>16)+(mid>>>16))>>>0;
+}
+function philox4(c0,c1,c2,c3,k0,k1){
+  for(let r=0;r<10;r++){
+    if(r>0){ k0=(k0+PH_W0)>>>0; k1=(k1+PH_W1)>>>0; }
+    const lo0=Math.imul(PH_M0,c0)>>>0, hi0=mulhi32(PH_M0,c0);
+    const lo1=Math.imul(PH_M1,c2)>>>0, hi1=mulhi32(PH_M1,c2);
+    const n0=(hi1^c1^k0)>>>0, n2=(hi0^c3^k1)>>>0;
+    c0=n0; c1=lo1; c2=n2; c3=lo0;
+  }
+  return [c0,c1,c2,c3];
+}
+function noiseU(seed,stream,i,draw){ return (philox4(i>>>0,draw>>>0,0,0,seed>>>0,stream>>>0)[0]>>>8)*TWO_M24; }
+
+/* ---------- colormap ---------- */
+const STOPS = [[0,[14,26,58]],[0.3,[35,80,138]],[0.55,[78,156,192]],[0.8,[232,217,168]],[1,[255,247,230]]];
+const LUT = new Float32Array(256*4), LUT32 = new Uint32Array(256);
+for (let i=0;i<256;i++){
+  const t=i/255; let k=0; while(k<STOPS.length-2 && t>STOPS[k+1][0]) k++;
+  const [t0,c0]=STOPS[k], [t1,c1]=STOPS[k+1], u=(t-t0)/(t1-t0);
+  const c=c0.map((v,j)=>Math.round(v+(c1[j]-v)*u));
+  LUT[i*4]=c[0]/255; LUT[i*4+1]=c[1]/255; LUT[i*4+2]=c[2]/255; LUT[i*4+3]=1;
+  LUT32[i]=(255<<24)|(c[2]<<16)|(c[1]<<8)|c[0];
+}
+
+/* ---------- CPU FFT (double-precision butterflies, used for init and CPU engine) ---------- */
+function makeFFT(N){
+  const logN=Math.round(Math.log2(N)), rev=new Uint32Array(N);
+  for(let i=0;i<N;i++){let r=0,x=i;for(let b=0;b<logN;b++){r=(r<<1)|(x&1);x>>=1;}rev[i]=r;}
+  const cs=new Float64Array(N/2), sn=new Float64Array(N/2);
+  for(let k=0;k<N/2;k++){cs[k]=Math.cos(2*Math.PI*k/N); sn[k]=-Math.sin(2*Math.PI*k/N);}
+  const tr=new Float64Array(N), ti=new Float64Array(N);
+  function f1(re,im,off,stride,sign){
+    for(let i=0;i<N;i++){const j=rev[i],p=off+i*stride; tr[j]=re[p]; ti[j]=im[p];}
+    for(let size=2,step=N>>1; size<=N; size<<=1, step>>=1){
+      const half=size>>1;
+      for(let s0=0;s0<N;s0+=size){
+        for(let k=0,t=0;k<half;k++,t+=step){
+          const wr=cs[t], wi=sign*sn[t], a=s0+k, b=a+half;
+          const xr=tr[b]*wr-ti[b]*wi, xi=tr[b]*wi+ti[b]*wr;
+          tr[b]=tr[a]-xr; ti[b]=ti[a]-xi; tr[a]+=xr; ti[a]+=xi;
+        }
+      }
+    }
+    for(let i=0;i<N;i++){const p=off+i*stride; re[p]=tr[i]; im[p]=ti[i];}
+  }
+  function f2(re,im,sign){ for(let y=0;y<N;y++) f1(re,im,y*N,1,sign); for(let x=0;x<N;x++) f1(re,im,x,N,sign); }
+  return { f2, cs, sn };
+}
+let fftCache=null;
+function getFFT(N){ if(!fftCache||fftCache.N!==N){ fftCache={N,fft:makeFFT(N)}; } return fftCache.fft; }
+
+/* ---------- ETD1 coefficients, double precision, stored f32 interleaved [E, Phi/NN] ---------- */
+function buildCoefs(N,dx,r,C,dt,fd,Arr=Float32Array){
+  const NN=N*N, out=new Arr(2*NN), inv=1/NN, idx2=1/(dx*dx);
+  const c=new Float64Array(N), k=new Float64Array(N);
+  for(let m=0;m<N;m++){ c[m]=Math.cos(2*Math.PI*m/N); const ms=m<=N/2?m:m-N; k[m]=2*Math.PI*ms/(N*dx); }
+  for(let n=0;n<N;n++) for(let m=0;m<N;m++){
+    const i=n*N+m;
+    let K2 = fd ? (10/3 - (4/3)*(c[m]+c[n]) - (2/3)*c[m]*c[n])*idx2 : k[m]*k[m]+k[n]*k[n];
+    if(i===0 || K2<0) K2=0;
+    const q=1-K2, L=-K2*(r+q*q+C), x=L*dt;
+    out[2*i]=Math.exp(x);
+    const phi = L!==0 ? Math.expm1(x)/L : dt;
+    out[2*i+1] = -K2*phi*inv;
+  }
+  return out;
+}
+
+/* ---------- hot initial state, returned as normalized spectrum F(psi)/NN ---------- */
+function quenchSpectrum(N,psibar,A,seed){
+  const NN=N*N, re=new Float64Array(NN), im=new Float64Array(NN);
+  for(let i=0;i<NN;i++) re[i]=A*(2*noiseU(seed,0,i,0)-1);
+  getFFT(N).f2(re,im,1);
+  const out=new Float64Array(2*NN), inv=1/NN;
+  for(let i=0;i<NN;i++){ out[2*i]=re[i]*inv; out[2*i+1]=im[i]*inv; }
+  out[0]=psibar; out[1]=0;
+  return out;
+}
+
+/* ---------- CPU engine ---------- */
+function makeCPU(canvas,f64){
+  const ctx=canvas.getContext('2d');
+  const Arr=f64?Float64Array:Float32Array;
+  const B={name:f64?'CPU f64':'CPU f32', gen:0, onStats:null, coefType:Arr};
+  let N,NN,fft,h,wr,wi,psiR,bre,bim,coef,C=1,img,px;
+  B.init=async n=>{
+    N=n; NN=n*n; fft=getFFT(n);
+    h=new Arr(2*NN); wr=new Arr(NN); wi=new Arr(NN);
+    psiR=new Arr(NN); bre=new Float64Array(NN); bim=new Float64Array(NN);
+    canvas.width=n; canvas.height=n; img=ctx.createImageData(n,n); px=new Uint32Array(img.data.buffer);
+  };
+  B.setState=spec=>{ h.set(spec); };
+  B.setCoefs=(cf,c)=>{ coef=cf; C=c; };
+  B.setPsibar=v=>{ h[0]=v; h[1]=0; };
+  function step(){
+    for(let i=0;i<NN;i++){ wr[i]=h[2*i]; wi[i]=h[2*i+1]; }
+    fft.f2(wr,wi,-1);
+    let m=0, bad=false;
+    for(let i=0;i<NN;i++){
+      const p=wr[i]; psiR[i]=p; const pp=p*p;
+      if(pp>m) m=pp; else if(pp!==pp) bad=true;
+      wr[i]=p*(pp-C); wi[i]=0;
+    }
+    fft.f2(wr,wi,1);
+    for(let i=0;i<NN;i++){
+      const e=coef[2*i], q=coef[2*i+1];
+      h[2*i]=e*h[2*i]+q*wr[i]; h[2*i+1]=e*h[2*i+1]+q*wi[i];
+    }
+    return bad?Infinity:m;
+  }
+  function brush(b){
+    bre.fill(0); bim.fill(0);
+    const R=b.R, r2=b.rad*b.rad, fx=Math.floor(b.cx), fy=Math.floor(b.cy);
+    for(let oy=-R;oy<=R;oy++) for(let ox=-R;ox<=R;ox++){
+      const x=((fx+ox)%N+N)%N, y=((fy+oy)%N+N)%N, i=y*N+x;
+      const ddx=ox+0.5-(b.cx-fx), ddy=oy+0.5-(b.cy-fy);
+      bre[i]=b.amp*Math.exp(-(ddx*ddx+ddy*ddy)/r2)*(2*noiseU(b.seed,1,i,b.event)-1);
+    }
+    fft.f2(bre,bim,1);
+    const inv=1/NN;
+    for(let i=1;i<NN;i++){ h[2*i]+=bre[i]*inv; h[2*i+1]+=bim[i]*inv; }
+  }
+  B.frame=(n,b,lo,hi)=>{
+    const t0=performance.now(); let done=0, m=0;
+    if(b) brush(b);
+    while(done<n){ const mm=step(); if(mm>m||mm===Infinity) m=mm; done++; if(performance.now()-t0>14) break; }
+    const s=255/(hi-lo);
+    for(let i=0;i<NN;i++){ let t=((psiR[i]-lo)*s+0.5)|0; t=t<0?0:t>255?255:t; px[i]=LUT32[t]; }
+    ctx.putImageData(img,0,0);
+    if(done>0 && B.onStats) B.onStats(m,B.gen);
+    return done;
+  };
+  B.destroy=()=>{};
+  return B;
+}
+
+/* ---------- WebGPU engine ---------- */
+function fftWGSL(N,sign){
+  const logN=Math.round(Math.log2(N)), WG=Math.min(256,N/2);
+  return `
+const N:u32=${N}u; const LOGN:u32=${logN}u; const WG:u32=${WG}u; const SIGN:f32=${sign}.0;
+@group(0) @binding(0) var<storage,read> src: array<vec2f>;
+@group(0) @binding(1) var<storage,read_write> dst: array<vec2f>;
+@group(0) @binding(2) var<storage,read> tw: array<vec2f>;
+var<workgroup> s: array<vec2f, ${N}>;
+@compute @workgroup_size(${WG})
+fn main(@builtin(workgroup_id) wg: vec3u, @builtin(local_invocation_index) li: u32) {
+  let row = wg.x;
+  let base = row * N;
+  for (var i = li; i < N; i += WG) { s[reverseBits(i) >> (32u - LOGN)] = src[base + i]; }
+  workgroupBarrier();
+  for (var st = 0u; st < LOGN; st++) {
+    let m = 1u << st;
+    for (var j = li; j < N / 2u; j += WG) {
+      let k = j & (m - 1u);
+      let i0 = ((j >> st) << (st + 1u)) + k;
+      let i1 = i0 + m;
+      var w = tw[k << (LOGN - 1u - st)];
+      w.y = w.y * SIGN;
+      let a = s[i0];
+      let b = s[i1];
+      let t = vec2f(w.x * b.x - w.y * b.y, w.x * b.y + w.y * b.x);
+      s[i0] = a + t;
+      s[i1] = a - t;
+    }
+    workgroupBarrier();
+  }
+  for (var i = li; i < N; i += WG) { dst[i * N + row] = s[i]; }
+}`;
+}
+const PRM = `struct Prm { C: f32, NN: u32, invNN: f32, pad: f32 };`;
+const NL_WGSL = PRM + `
+@group(0) @binding(0) var<storage, read> psi: array<vec2f>;
+@group(0) @binding(1) var<storage, read_write> g: array<vec2f>;
+@group(0) @binding(2) var<storage, read_write> psiR: array<f32>;
+@group(0) @binding(3) var<storage, read_write> stats: array<atomic<u32>>;
+@group(0) @binding(4) var<uniform> prm: Prm;
+var<workgroup> wm: atomic<u32>;
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u, @builtin(local_invocation_index) li: u32) {
+  if (li == 0u) { atomicStore(&wm, 0u); }
+  workgroupBarrier();
+  let i = gid.x;
+  if (i < prm.NN) {
+    let p = psi[i].x;
+    psiR[i] = p;
+    let pp = p * p;
+    g[i] = vec2f(p * (pp - prm.C), 0.0);
+    atomicMax(&wm, bitcast<u32>(pp));
+  }
+  workgroupBarrier();
+  if (li == 0u) { atomicMax(&stats[0], atomicLoad(&wm)); }
+}`;
+const UPD_WGSL = PRM + `
+@group(0) @binding(0) var<storage, read_write> h: array<vec2f>;
+@group(0) @binding(1) var<storage, read> g: array<vec2f>;
+@group(0) @binding(2) var<storage, read> cf: array<vec2f>;
+@group(0) @binding(3) var<uniform> prm: Prm;
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u) {
+  let i = gid.x;
+  if (i >= prm.NN) { return; }
+  let c = cf[i];
+  h[i] = c.x * h[i] + c.y * g[i];
+}`;
+const INJ_WGSL = PRM + `
+@group(0) @binding(0) var<storage, read_write> h: array<vec2f>;
+@group(0) @binding(1) var<storage, read> g: array<vec2f>;
+@group(0) @binding(2) var<uniform> prm: Prm;
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u) {
+  let i = gid.x;
+  if (i >= prm.NN || i == 0u) { return; }
+  h[i] = h[i] + g[i] * prm.invNN;
+}`;
+const BRUSH_WGSL = `
+struct Br { cx: f32, cy: f32, rad: f32, amp: f32, seed: u32, N: u32, event: u32, R: u32 };
+@group(0) @binding(0) var<storage, read_write> outp: array<vec2f>;
+@group(0) @binding(1) var<uniform> b: Br;
+fn mulhi(a: u32, c: u32) -> u32 {
+  let a0 = a & 0xffffu; let a1 = a >> 16u; let c0 = c & 0xffffu; let c1 = c >> 16u;
+  let p00 = a0 * c0; let p01 = a0 * c1; let p10 = a1 * c0; let p11 = a1 * c1;
+  let mid = (p00 >> 16u) + (p01 & 0xffffu) + (p10 & 0xffffu);
+  return p11 + (p01 >> 16u) + (p10 >> 16u) + (mid >> 16u);
+}
+fn philox0(ctr: vec4u, key: vec2u) -> u32 {
+  var c = ctr;
+  var k = key;
+  for (var r = 0u; r < 10u; r++) {
+    if (r > 0u) { k = k + vec2u(0x9E3779B9u, 0xBB67AE85u); }
+    let lo0 = 0xD2511F53u * c.x; let hi0 = mulhi(0xD2511F53u, c.x);
+    let lo1 = 0xCD9E8D57u * c.z; let hi1 = mulhi(0xCD9E8D57u, c.z);
+    c = vec4u(hi1 ^ c.y ^ k.x, lo1, hi0 ^ c.w ^ k.y, lo0);
+  }
+  return c.x;
+}
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u) {
+  let NN = b.N * b.N;
+  let i = gid.x;
+  if (i >= NN) { return; }
+  let n = i32(b.N);
+  let R = i32(b.R);
+  let fx = floor(b.cx);
+  let fy = floor(b.cy);
+  var ox = i32(i % b.N) - i32(fx);
+  var oy = i32(i / b.N) - i32(fy);
+  ox = ((ox + n / 2) % n + n) % n - n / 2;
+  oy = ((oy + n / 2) % n + n) % n - n / 2;
+  if (abs(ox) > R || abs(oy) > R) { outp[i] = vec2f(0.0, 0.0); return; }
+  let dx = f32(ox) + 0.5 - (b.cx - fx);
+  let dy = f32(oy) + 0.5 - (b.cy - fy);
+  let m = exp(-(dx * dx + dy * dy) / (b.rad * b.rad));
+  let u = f32(philox0(vec4u(i, b.event, 0u, 0u), vec2u(b.seed, 1u)) >> 8u) * 5.9604644775390625e-8;
+  outp[i] = vec2f(b.amp * m * (2.0 * u - 1.0), 0.0);
+}`;
+const RENDER_WGSL = `
+struct R { lo: f32, hi: f32, N: u32, p: u32 };
+@group(0) @binding(0) var<storage, read> psiR: array<f32>;
+@group(0) @binding(1) var<storage, read> lut: array<vec4f>;
+@group(0) @binding(2) var<uniform> rp: R;
+@vertex fn vs(@builtin(vertex_index) vi: u32) -> @builtin(position) vec4f {
+  var p = array<vec2f, 3>(vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
+  return vec4f(p[vi], 0.0, 1.0);
+}
+@fragment fn fs(@builtin(position) pos: vec4f) -> @location(0) vec4f {
+  let x = min(u32(pos.x), rp.N - 1u);
+  let y = min(u32(pos.y), rp.N - 1u);
+  let v = psiR[y * rp.N + x];
+  let t = clamp((v - rp.lo) / (rp.hi - rp.lo), 0.0, 1.0);
+  return vec4f(lut[u32(t * 255.0 + 0.5)].rgb, 1.0);
+}`;
+
+async function makeGPU(canvas){
+  if(!('gpu' in navigator)) return null;
+  const adapter=await navigator.gpu.requestAdapter({powerPreference:'high-performance'});
+  if(!adapter) return null;
+  const device=await adapter.requestDevice();
+  const ctx=canvas.getContext('webgpu');
+  if(!ctx){ device.destroy(); return null; }
+  const fmt=navigator.gpu.getPreferredCanvasFormat();
+  const U=GPUBufferUsage;
+  const B={name:'GPU f32', gen:0, onStats:null, device, coefType:Float32Array};
+  device.pushErrorScope('validation');
+  const comp=code=>device.createComputePipeline({layout:'auto',compute:{module:device.createShaderModule({code}),entryPoint:'main'}});
+  const P={ nl:comp(NL_WGSL), up:comp(UPD_WGSL), inj:comp(INJ_WGSL), br:comp(BRUSH_WGSL) };
+  const rmod=device.createShaderModule({code:RENDER_WGSL});
+  P.render=device.createRenderPipeline({layout:'auto',
+    vertex:{module:rmod,entryPoint:'vs'}, fragment:{module:rmod,entryPoint:'fs',targets:[{format:fmt}]},
+    primitive:{topology:'triangle-list'}});
+  const err0=await device.popErrorScope();
+  if(err0){ device.destroy(); throw new Error(err0.message); }
+
+  let N,NN,buf={},bgs={},ring=[],fftF,fftI;
+  const mk=(size,usage)=>device.createBuffer({size,usage});
+  const bg=(pipe,list)=>device.createBindGroup({layout:pipe.getBindGroupLayout(0),
+    entries:list.map((b,i)=>({binding:i,resource:{buffer:b}}))});
+
+  B.init=async n=>{
+    for(const k in buf) buf[k].destroy(); buf={};
+    ring.forEach(r=>{ try{ r.buf.destroy(); }catch(e){} }); ring=[];
+    N=n; NN=n*n;
+    canvas.width=n; canvas.height=n;
+    ctx.configure({device,format:fmt,alphaMode:'opaque'});
+    device.pushErrorScope('validation');
+    const cx=NN*8;
+    buf.h=mk(cx,U.STORAGE|U.COPY_DST); buf.a=mk(cx,U.STORAGE); buf.b=mk(cx,U.STORAGE);
+    buf.psiR=mk(NN*4,U.STORAGE); buf.coef=mk(cx,U.STORAGE|U.COPY_DST);
+    buf.tw=mk(N*4,U.STORAGE|U.COPY_DST); buf.stats=mk(16,U.STORAGE|U.COPY_SRC|U.COPY_DST);
+    buf.prm=mk(16,U.UNIFORM|U.COPY_DST); buf.brush=mk(32,U.UNIFORM|U.COPY_DST);
+    buf.rprm=mk(16,U.UNIFORM|U.COPY_DST); buf.lut=mk(256*16,U.STORAGE|U.COPY_DST);
+    for(let i=0;i<3;i++) ring.push({buf:mk(16,U.MAP_READ|U.COPY_DST),busy:false});
+    device.queue.writeBuffer(buf.lut,0,LUT);
+    const tw=new Float32Array(N); // N/2 complex twiddles exp(-2πik/N), computed in f64
+    for(let k=0;k<N/2;k++){ tw[2*k]=Math.cos(2*Math.PI*k/N); tw[2*k+1]=-Math.sin(2*Math.PI*k/N); }
+    device.queue.writeBuffer(buf.tw,0,tw);
+    fftF=comp(fftWGSL(N,1)); fftI=comp(fftWGSL(N,-1));
+    bgs.i1=bg(fftI,[buf.h,buf.a,buf.tw]); bgs.i2=bg(fftI,[buf.a,buf.b,buf.tw]);
+    bgs.nl=bg(P.nl,[buf.b,buf.a,buf.psiR,buf.stats,buf.prm]);
+    bgs.f1=bg(fftF,[buf.a,buf.b,buf.tw]); bgs.f2=bg(fftF,[buf.b,buf.a,buf.tw]);
+    bgs.up=bg(P.up,[buf.h,buf.a,buf.coef,buf.prm]);
+    bgs.br=bg(P.br,[buf.a,buf.brush]);
+    bgs.inj=bg(P.inj,[buf.h,buf.a,buf.prm]);
+    bgs.r=bg(P.render,[buf.psiR,buf.lut,buf.rprm]);
+    const err=await device.popErrorScope();
+    if(err) throw new Error(err.message);
+  };
+  B.setState=spec=>device.queue.writeBuffer(buf.h,0,new Float32Array(spec));
+  B.setPsibar=v=>device.queue.writeBuffer(buf.h,0,new Float32Array([v,0]));
+  B.setCoefs=(cf,C)=>{
+    const dv=new DataView(new ArrayBuffer(16));
+    dv.setFloat32(0,C,true); dv.setUint32(4,NN,true); dv.setFloat32(8,1/NN,true);
+    device.queue.writeBuffer(buf.prm,0,dv.buffer);
+    device.queue.writeBuffer(buf.coef,0,cf);
+  };
+  B.frame=(n,b,lo,hi)=>{
+    const rv=new DataView(new ArrayBuffer(16));
+    rv.setFloat32(0,lo,true); rv.setFloat32(4,hi,true); rv.setUint32(8,N,true);
+    device.queue.writeBuffer(buf.rprm,0,rv.buffer);
+    if(b){
+      const d=new DataView(new ArrayBuffer(32));
+      d.setFloat32(0,b.cx,true); d.setFloat32(4,b.cy,true); d.setFloat32(8,b.rad,true); d.setFloat32(12,b.amp,true);
+      d.setUint32(16,b.seed,true); d.setUint32(20,N,true); d.setUint32(24,b.event,true); d.setUint32(28,b.R,true);
+      device.queue.writeBuffer(buf.brush,0,d.buffer);
+    }
+    const enc=device.createCommandEncoder();
+    if(n>0) enc.clearBuffer(buf.stats);
+    const cp=enc.beginComputePass();
+    const wgE=Math.ceil(NN/256);
+    const run=(p,g,x)=>{ cp.setPipeline(p); cp.setBindGroup(0,g); cp.dispatchWorkgroups(x); };
+    if(b){ run(P.br,bgs.br,wgE); run(fftF,bgs.f1,N); run(fftF,bgs.f2,N); run(P.inj,bgs.inj,wgE); }
+    for(let s=0;s<n;s++){
+      run(fftI,bgs.i1,N); run(fftI,bgs.i2,N);   // psi = F^-1 psiHat
+      run(P.nl,bgs.nl,wgE);                     // g = psi^3 - C psi
+      run(fftF,bgs.f1,N); run(fftF,bgs.f2,N);   // F g
+      run(P.up,bgs.up,wgE);                     // psiHat = E psiHat + Phi F g
+    }
+    cp.end();
+    const rp=enc.beginRenderPass({colorAttachments:[{view:ctx.getCurrentTexture().createView(),
+      loadOp:'clear',storeOp:'store',clearValue:{r:0,g:0,b:0,a:1}}]});
+    rp.setPipeline(P.render); rp.setBindGroup(0,bgs.r); rp.draw(3); rp.end();
+    let rb=null;
+    if(n>0){ rb=ring.find(r=>!r.busy); if(rb){ enc.copyBufferToBuffer(buf.stats,0,rb.buf,0,4); rb.busy=true; } }
+    device.queue.submit([enc.finish()]);
+    if(rb){
+      const g=B.gen;
+      rb.buf.mapAsync(GPUMapMode.READ).then(()=>{
+        const v=new Float32Array(rb.buf.getMappedRange(0,4).slice(0))[0];
+        rb.buf.unmap(); rb.busy=false;
+        if(B.onStats) B.onStats(v,g);
+      },()=>{ rb.busy=false; });
+    }
+    return n;
+  };
+  B.destroy=()=>{ B.dead=true; try{ device.destroy(); }catch(e){} };
+  device.lost.then(info=>{
+    if(B.dead || info.reason==='destroyed') return;
+    note('The GPU device was lost, so the simulation moved to the CPU.');
+    S.engine='cpu32'; $('#engine').value='cpu32'; start();
+  });
+  return B;
+}
+
+/* ---------- controller ---------- */
+let brushEvent=0, backend=null, gen=0, simT=0, lastM=1, Clevel=null, Ccur=1, lastLower=0, needOne=true;
+const pointer={down:false,cx:0,cy:0};
+
+function note(msg){ $('#note').textContent=msg||''; }
+function rebuildCoefs(){ if(backend) backend.setCoefs(buildCoefs(S.N,DX,S.r,Ccur,S.dt,S.fd,backend.coefType),Ccur); }
+function Cneed(m){ const rr=Math.max(0,-S.r); return Math.max(0.3, rr+0.1, 1.6*m+rr+0.05); }
+function updateC(m,force){
+  const L=Math.ceil(Math.log(Cneed(m))/Math.log(1.2)), now=performance.now();
+  const lower = Clevel!==null && L<Clevel-1 && now-lastLower>500;
+  if(force || Clevel===null || L>Clevel || lower){
+    if(lower) lastLower=now;
+    Clevel=L; Ccur=Math.pow(1.2,L); rebuildCoefs();
+  }
+}
+function onStats(m,g){
+  if(g!==gen) return;
+  if(!Number.isFinite(m) || m>1e4){ note('The field diverged, so it was quenched again.'); quench(); return; }
+  lastM=m;
+  if(!pointer.down) updateC(m);
+}
+function quench(){
+  gen++; backend.gen=gen; simT=0;
+  brushEvent=0;
+  backend.setState(quenchSpectrum(S.N,S.psibar,S.A,S.seed));
+  lastM=(Math.abs(S.psibar)+S.A)**2;
+  updateC(lastM,true);
+  needOne=true;
+}
+function freshCanvas(){
+  const old=$('#cv'), c=document.createElement('canvas');
+  c.id='cv'; c.setAttribute('aria-label','Density field ψ');
+  old.replaceWith(c); return c;
+}
+function syncGridOptions(){
+  const cpu=backend && backend.name.startsWith('CPU');
+  for(const o of $('#grid').options) o.disabled = cpu && +o.value>256;
+  $('#grid').value=String(S.N);
+}
+let starting=false;
+async function start(){
+  if(starting) return; starting=true;
+  if(backend){ backend.destroy(); backend=null; }
+  let be=null;
+  if(S.engine==='gpu32'){
+    let why='';
+    try{ const c=freshCanvas(); be=await makeGPU(c); if(be) await be.init(S.N); }
+    catch(e){ console.warn(e); why=String(e && e.message || e); if(be) be.destroy(); be=null; }
+    if(!be) note(why ? 'WebGPU failed, so the simulation runs on the CPU. Error: '+why.slice(0,400)
+                     : 'WebGPU isn’t available in this browser, so the simulation runs on the CPU.');
+  }
+  if(!be){
+    if(S.N>256) S.N = S.engine==='gpu32' ? 128 : 256;
+    const c=freshCanvas(); be=makeCPU(c,S.engine==='cpu64'); await be.init(S.N);
+  }
+  backend=be; backend.onStats=onStats; Clevel=null;
+  syncGridOptions(); quench();
+  $('#o-e').textContent=`${backend.name}, ${S.N}²`;
+  starting=false;
+}
+
+/* ---------- loop ---------- */
+let spsWin=0, spsT=performance.now(), sps=0, lastUI=0;
+function loop(now){
+  requestAnimationFrame(loop);
+  if(!backend || starting) return;
+  let n = S.paused ? (needOne?1:0) : S.spf;
+  let b=null;
+  if(pointer.down){
+    if(n===0) n=1;
+    b={cx:pointer.cx, cy:pointer.cy, rad:BRUSH_R, R:Math.ceil(3*BRUSH_R), amp:S.brushAmp, seed:S.seed, event:brushEvent++};
+    updateC(Math.max(lastM,(Math.abs(S.psibar)+0.9+S.brushAmp)**2));
+  }
+  needOne=false;
+  const lo=S.psibar-S.range, hi=S.psibar+S.range;
+  const done=backend.frame(n,b,lo,hi);
+  simT+=done*S.dt; spsWin+=done;
+  if(now-spsT>500){ sps=spsWin*1000/(now-spsT); spsWin=0; spsT=now; }
+  if(now-lastUI>250){
+    lastUI=now;
+    $('#o-t').textContent=simT.toFixed(0);
+    $('#o-sps').textContent=sps.toFixed(0);
+    $('#o-c').textContent=Ccur.toFixed(2);
+    $('#o-m').textContent=Math.sqrt(lastM).toFixed(2);
+    $('#o-e').textContent=`${backend.name}, ${S.N}²`;
+  }
+}
+
+/* ---------- UI ---------- */
+function bindRange(id,key,fmt,onchange){
+  const el=$('#'+id), out=$('#v-'+id);
+  const upd=()=>{ S[key]=parseFloat(el.value); out.textContent=fmt(S[key]); };
+  el.addEventListener('input',()=>{ upd(); if(onchange && backend && !starting) onchange(); });
+  upd();
+}
+const f2=v=>v.toFixed(2);
+bindRange('r','r',f2,()=>updateC(lastM,true));
+bindRange('pb','psibar',f2,()=>backend.setPsibar(S.psibar));
+bindRange('amp','A',f2);
+bindRange('heat','brushAmp',f2);
+bindRange('dt','dt',f2,rebuildCoefs);
+bindRange('spf','spf',v=>String(v|0));
+bindRange('range','range',v=>'± '+v.toFixed(2));
+document.querySelectorAll('input[name=op]').forEach(el=>el.addEventListener('change',()=>{
+  S.fd = document.querySelector('input[name=op]:checked').value==='fd'; rebuildCoefs();
+}));
+$('#grid').addEventListener('change',async e=>{
+  if(!backend || starting) return;
+  S.N=+e.target.value; starting=true;
+  try{ await backend.init(S.N); } catch(err){ console.warn(err); starting=false; S.engine='cpu32'; $('#engine').value='cpu32'; return start(); }
+  starting=false; Clevel=null; quench();
+});
+$('#engine').addEventListener('change',e=>{ S.engine=e.target.value; note(''); start(); });
+function readSeed(){
+  const v=Math.floor(Number($('#seed').value));
+  S.seed = Number.isFinite(v) ? ((v%4294967296)+4294967296)%4294967296 : 0;
+  $('#seed').value=String(S.seed);
+}
+$('#b-quench').addEventListener('click',()=>{ if(backend && !starting){ note(''); readSeed(); quench(); } });
+$('#b-seed').addEventListener('click',()=>{ $('#seed').value=String((Math.random()*4294967296)>>>0); if(backend && !starting){ note(''); readSeed(); quench(); } });
+$('#seed').addEventListener('change',()=>{ readSeed(); if(backend && !starting){ note(''); quench(); } });
+$('#b-pause').addEventListener('click',e=>{ S.paused=!S.paused; e.target.textContent=S.paused?'Resume':'Pause'; });
+
+const field=$('#field');
+function setPos(e){
+  const r=$('#cv').getBoundingClientRect();
+  const cl=v=>Math.min(Math.max(v,0),S.N-1e-3);
+  pointer.cx=cl((e.clientX-r.left)/r.width*S.N); pointer.cy=cl((e.clientY-r.top)/r.height*S.N);
+}
+field.addEventListener('pointerdown',e=>{ pointer.down=true; field.setPointerCapture(e.pointerId); setPos(e); });
+field.addEventListener('pointermove',e=>{ if(pointer.down) setPos(e); });
+['pointerup','pointercancel','lostpointercapture'].forEach(t=>field.addEventListener(t,()=>{ pointer.down=false; }));
+
+start().then(()=>requestAnimationFrame(loop));
+</script>
+<script src="../../shared/record.js" data-canvas="cv"></script>
+</body>
+</html>
