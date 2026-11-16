@@ -1,0 +1,38 @@
+[meta]
+name   = "pfc-defects-pure"
+order  = 20
+title  = "Pure PFC: defect and interface gallery"
+status = "active"
+tags   = ["PFC","defects","grain-boundary","interface","spectral","interactive"]
+
+[example]
+method  = "PFC"
+runtime = "browser-js"
+entry   = "index.html"
+thumb   = "thumb.webp"
+blurb   = "Seed dislocations, grain boundaries and solid-liquid interfaces in a single-component PFC crystal and watch them relax, with radial and azimuthal structure-factor plots."
+default_variant = 0
+
+[provenance]
+notes = "Prototyped in .sandbox/PFC defect and interface gallery.html. No pfc-models catalogue entry yet; catalogue fields left empty."
+
+[[variants]]
+model     = "stdpfc"
+backend   = "webgpu"
+precision = "float32"
+catalogue = ""
+status    = "active"
+
+[[variants]]
+model     = "stdpfc"
+backend   = "js-cpu"
+precision = "float32"
+catalogue = ""
+status    = "active"
+
+[[variants]]
+model     = "stdpfc"
+backend   = "js-cpu"
+precision = "float64"
+catalogue = ""
+status    = "active"

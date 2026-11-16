@@ -1,0 +1,1236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PFC defect and interface gallery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#EEF1F4; --surface:#FFFFFF; --ink:#1B2733; --muted:#5B6B7A;
+  --line:#C9D2DB; --accent:#2E6F95; --accent-ink:#FFFFFF; --warn:#A63D2A;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141B22; --surface:#1C252E; --ink:#E4EAF0; --muted:#8FA0B0;
+    --line:#2C3946; --accent:#6FB3D9; --accent-ink:#0F1A22; --warn:#E08A72;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141B22; --surface:#1C252E; --ink:#E4EAF0; --muted:#8FA0B0;
+  --line:#2C3946; --accent:#6FB3D9; --accent-ink:#0F1A22; --warn:#E08A72;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 36px;
+  display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
+@media (max-width:880px){main{grid-template-columns:minmax(0,1fr);gap:20px}}
+h1{font-size:1.6rem;line-height:1.15;font-weight:600;margin:0 0 4px;letter-spacing:-0.01em}
+.lede{margin:0 0 14px;color:var(--muted);max-width:62ch}
+.field{position:relative;width:100%;max-width:calc(100svh - 170px);min-width:260px;
+  touch-action:none;cursor:crosshair;border-radius:6px;overflow:hidden;background:#0E1A3A}
+@media (max-width:880px){.field{max-width:none}}
+.field canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;image-rendering:auto}
+.readout{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px 16px;margin:12px 0 0;
+  max-width:calc(100svh - 170px)}
+@media (max-width:880px){.readout{max-width:none;grid-template-columns:repeat(3,minmax(0,1fr))}}
+.readout div{min-width:0}
+.readout dt{font-size:12px;color:var(--muted)}
+.readout dd{margin:0;font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note{margin:10px 0 0;font-size:13px;color:var(--warn);min-height:1em;max-width:62ch}
+.controls{display:flex;flex-direction:column;gap:14px}
+.actions{display:flex;gap:8px}
+button{font:inherit;font-weight:500;padding:9px 14px;border-radius:6px;cursor:pointer;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);flex:1}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+fieldset{border:1px solid var(--line);border-radius:6px;margin:0;padding:8px 12px 12px;background:var(--surface)}
+legend{font-size:13px;font-weight:600;color:var(--muted);padding:0 4px}
+.ctl{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:0 8px;margin-top:8px}
+.ctl span{font-size:14px}
+.ctl output{font-size:14px;font-weight:500}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+.plotwrap{margin-top:14px;max-width:calc(100svh - 170px)}
+@media (max-width:880px){.plotwrap{max-width:none}}
+.plothead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin:12px 0 6px}
+.plothead h2{font-size:14px;font-weight:600;margin:0}
+.pmeta{font-size:13px;color:var(--muted)}
+.look{margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0;background:var(--surface);max-width:calc(100svh - 170px)}
+@media (max-width:880px){.look{max-width:none}}
+.look h2{font-size:15px;font-weight:600;margin:0 0 4px}
+.look p{margin:0 0 4px;font-size:14px}
+.gallery{grid-column:1/-1}
+.gallery>h2{font-size:1.25rem;font-weight:600;margin:6px 0 2px}
+.gallery h3{font-size:14px;font-weight:600;margin:18px 0 8px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.card{display:flex;flex-direction:column;gap:6px;text-align:left;padding:8px;border:1px solid var(--line);border-radius:6px;
+  background:var(--surface);cursor:pointer;font:inherit;color:inherit}
+.card[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.card canvas{width:100%;aspect-ratio:1/1;border-radius:4px;display:block;background:#0E1A3A}
+.card .ct{font-weight:600;font-size:14px;line-height:1.25}
+.card .cs{font-size:13px;color:var(--muted);line-height:1.3}
+canvas.plot{display:block;width:100%;height:150px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.ctl input[type=range]{grid-column:1/-1;width:100%;margin:4px 0 0;accent-color:var(--accent)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;font-size:14px}
+select{font:inherit;font-size:14px;padding:4px 6px;border-radius:5px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.radios{display:flex;flex-direction:column;gap:4px;margin-top:10px;font-size:14px}
+.radios label{display:flex;gap:6px;align-items:center}
+.radios input{accent-color:var(--accent);margin:0}
+.seedbox{display:flex;gap:6px;align-items:center}
+.seedbox input{width:8.5em;font:inherit;font-size:14px;padding:4px 6px;border-radius:5px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.seedbox button{padding:4px 10px;font-size:14px}
+details{font-size:14px;color:var(--ink)}
+summary{cursor:pointer;font-weight:500}
+details p{margin:8px 0 0;color:var(--muted);line-height:1.55}
+.eq{color:var(--ink)}
+</style>
+</head>
+<body>
+<main>
+  <section>
+    <h1>PFC defect and interface gallery</h1>
+    <p class="lede">Initial states built to relax into specific grain boundaries, vacancy clusters, islands and dislocations. Pick one from the gallery; it loads with the temperature and density it needs.</p>
+    <div class="field" id="field"><canvas id="cv" width="256" height="256" aria-label="Density field ψ"></canvas></div>
+    <dl class="readout">
+      <div><dt>Time</dt><dd id="o-t">0</dd></div>
+      <div><dt>Steps per second</dt><dd id="o-sps">0</dd></div>
+      <div><dt>Stabilizer C</dt><dd id="o-c">0</dd></div>
+      <div><dt>Max |ψ|</dt><dd id="o-m">0</dd></div>
+      <div><dt>Engine</dt><dd id="o-e">Starting</dd></div>
+    </dl>
+    <p class="note" id="note" role="status"></p>
+    <div class="look" id="look"><h2 id="look-title"></h2><p id="look-text"></p>
+      <label class="ctl" id="look-ctl" hidden><span id="look-plabel"></span><output id="look-pval"></output>
+        <input type="range" id="look-param"></label>
+      <p class="pmeta" id="look-params"></p></div>
+    <div class="plotwrap">
+      <div class="plothead"><h2>Radial profile S(|k|)</h2><span class="pmeta" id="rad-meta"></span></div>
+      <canvas id="radplot" class="plot" aria-label="Radially averaged structure factor, log scale"></canvas>
+      <div class="plothead"><h2>Azimuthal profile S(θ) on the first ring</h2><span class="pmeta" id="az-meta"></span></div>
+      <canvas id="azplot" class="plot" aria-label="Structure factor around the first ring against angle, log scale"></canvas>
+    </div>
+  </section>
+
+  <aside class="controls">
+    <div class="actions">
+      <button class="primary" id="b-quench">Reset</button>
+      <button id="b-pause">Pause</button>
+    </div>
+
+    <fieldset>
+      <legend>Model</legend>
+      <label class="ctl"><span>Undercooling r</span><output id="v-r"></output>
+        <input type="range" id="r" min="-1.2" max="-0.02" step="0.01" value="-0.25"></label>
+      <label class="ctl"><span>Mean density ψ̄</span><output id="v-pb"></output>
+        <input type="range" id="pb" min="-0.6" max="0.1" step="0.01" value="-0.25"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Quench</legend>
+      <label class="ctl"><span>Noise amplitude</span><output id="v-amp"></output>
+        <input type="range" id="amp" min="0.1" max="2" step="0.05" value="1"></label>
+      <label class="ctl"><span>Reheat strength</span><output id="v-heat"></output>
+        <input type="range" id="heat" min="0.1" max="1.5" step="0.05" value="0.8"></label>
+      <div class="row"><label for="seed">Seed</label>
+        <span class="seedbox"><input type="number" id="seed" min="0" max="4294967295" step="1" inputmode="numeric" value="12345"><button id="b-seed" type="button">New seed</button></span></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Integrator</legend>
+      <label class="ctl"><span>Time step Δt</span><output id="v-dt"></output>
+        <input type="range" id="dt" min="0.05" max="3" step="0.05" value="0.5"></label>
+      <label class="ctl"><span>Steps per frame</span><output id="v-spf"></output>
+        <input type="range" id="spf" min="1" max="60" step="1" value="8"></label>
+      <div class="radios" role="radiogroup" aria-label="Linear operator">
+        <label><input type="radio" name="op" value="fd" checked> 7×7 stencil symbol</label>
+        <label><input type="radio" name="op" value="sp"> Exact spectral symbol</label>
+      </div>
+      <div class="row"><label for="grid">Grid</label>
+        <select id="grid">
+          <option value="128">128 × 128</option>
+          <option value="256" selected>256 × 256</option>
+          <option value="512">512 × 512</option>
+          <option value="1024">1024 × 1024</option>
+        </select></div>
+      <div class="row"><label for="engine">Engine</label>
+        <select id="engine">
+          <option value="gpu32" selected>GPU f32 (WebGPU)</option>
+          <option value="cpu32">CPU f32</option>
+          <option value="cpu64">CPU f64</option>
+        </select></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>View</legend>
+      <div class="radios" role="radiogroup" aria-label="View">
+        <label><input type="radio" name="view" value="real" checked> Density ψ(r)</label>
+        <label><input type="radio" name="view" value="fourier"> Structure factor |ψ̂(k)|², log scale</label>
+      </div>
+      <label class="ctl"><span>Color range around ψ̄</span><output id="v-range"></output>
+        <input type="range" id="range" min="0.2" max="1.5" step="0.05" value="0.7"></label>
+      <div class="row"><label for="kzoom">k range</label>
+        <select id="kzoom">
+          <option value="1.4">|k| ≤ 1.4</option>
+          <option value="2" selected>|k| ≤ 2</option>
+          <option value="4">Whole spectrum</option>
+        </select></div>
+      <div class="row"><label for="kavg">Averaging</label>
+        <select id="kavg">
+          <option value="1">None</option>
+          <option value="0.2" selected>Short</option>
+          <option value="0.03">Long</option>
+        </select></div>
+      <label class="ctl"><span>Dynamic range (decades)</span><output id="v-dec"></output>
+        <input type="range" id="dec" min="2" max="10" step="0.5" value="6"></label>
+      <label class="check"><input type="checkbox" id="rings" checked> Rings at q₀ and √3 q₀</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Defects</legend>
+      <div class="actions" style="flex-wrap:wrap">
+        <button id="b-xtal" type="button">Seed single crystal</button>
+        <button id="b-bix" type="button">Seed bicrystal</button>
+      </div>
+      <label class="ctl"><span>Bicrystal misorientation</span><output id="v-theta"></output>
+        <input type="range" id="theta" min="2" max="30" step="1" value="12"></label>
+      <div class="actions" style="margin-top:10px"><button id="b-vac" type="button">Punch vacancies</button></div>
+      <label class="ctl"><span>Vacancy fraction</span><output id="v-vac"></output>
+        <input type="range" id="vac" min="0.5" max="10" step="0.5" value="3"></label>
+      <p class="hint">Seeds replace the field with a relaxed-amplitude triangular crystal fitted to the periodic box. Punching removes randomly chosen atoms; the removed mass spreads evenly, so the mean stays put.</p>
+    </fieldset>
+
+    <details>
+      <summary>How it steps</summary>
+      <p><span class="eq">∂ψ/∂t = ∇²[(r + (1+∇²)²)ψ + ψ³]</span>, grid spacing π/4, periodic.</p>
+      <p>Each step: ψ = F⁻¹ψ̂, g = ψ³ − Cψ, then ψ̂ ← Eψ̂ + Φ·Fg, with L = −K²(r + (1−K²)² + C), E = e<sup>LΔt</sup>, Φ = −K²(e<sup>LΔt</sup>−1)/L. That’s first-order exponential time differencing (ETD1).</p>
+      <p>K² is the Fourier symbol of the isotropic 9-point Laplacian, so the linear operator is exactly the 7×7 stencil, applied diagonally in Fourier space.</p>
+      <p>E, Φ and the FFT twiddles are computed in double precision (expm1 for small LΔt) and uploaded as f32. The state lives in Fourier space and Φ vanishes at k = 0, so the mean density is preserved exactly.</p>
+      <p>Structure factor view: |ψ̂(k)|² of the stored spectrum on a log scale, k = 0 omitted, optionally averaged over frames. A crystal gives six Bragg spots on the ring at q₀ and weaker ones at √3 q₀. Grains rotate the spot sets and smear them into arcs; many grains make a ring. Vacancies lower the spots and add a flat diffuse haze plus faint lobes beside each spot along its radial direction (Huang scattering from the strain around each vacancy). Long averaging and a wide dynamic range bring out the diffuse parts.</p>
+      <p>Profiles: S(|k|) averages the structure factor over rings one k-pixel wide; the peak position and full width at half maximum are read off it. S(θ) averages over the first ring (centred on the measured peak) in 3° bins; spots are runs above half the maximum, and their mean width measures mosaic spread or arc length. Both use the same frame averaging as the view and update twice a second.</p>
+      <p>The cubic term is explicit; C is the linear stabilizer moved between the two sides. It’s set from the measured max ψ² so the frozen-coefficient amplification stays below one. Steady states don’t depend on C.</p>
+      <p>Noise is Philox4x32-10 keyed by (seed, stream), with stream 0 for the quench and stream 1 for reheat strokes, counter (cell, stroke) and u = (word₀ ≫ 8)·2⁻²⁴. Vacancy selection uses stream 6 with counter (atom cell, punch). philox.py reproduces it exactly. The same seed and the same strokes give the same run.</p>
+      <p>GPU f32 is f32 throughout. CPU f32 stores in f32 but does arithmetic in double. CPU f64 is double throughout. WebGPU has no f64.</p>
+    </details>
+  </aside>
+
+  <section class="gallery" aria-labelledby="gal-h">
+    <h2 id="gal-h">Gallery</h2>
+    <p class="hint">Thumbnails show each initial state. Grain-boundary angles are fitted to the periodic box, so the achieved angle is shown; it gets closer to the ideal on larger grids.</p>
+    <div id="cards"></div>
+  </section>
+</main>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const DX = Math.PI / 4;
+const S = { N:256, r:-0.25, psibar:-0.25, A:1.0, brushAmp:0.8, dt:0.5, spf:8, range:0.7,
+            fd:true, paused:false, engine:'gpu32', seed:12345 };
+const BRUSH_R = 9 / DX; // cells
+
+/* ---------- Philox4x32-10 (Random123), matches philox.py ---------- */
+const PH_M0=0xD2511F53, PH_M1=0xCD9E8D57, PH_W0=0x9E3779B9, PH_W1=0xBB67AE85, TWO_M24=5.9604644775390625e-8;
+function mulhi32(a,b){
+  const a0=a&0xffff, a1=a>>>16, b0=b&0xffff, b1=b>>>16;
+  const p00=a0*b0, p01=a0*b1, p10=a1*b0, p11=a1*b1;
+  const mid=(p00>>>16)+(p01&0xffff)+(p10&0xffff);
+  return (p11+(p01>>>16)+(p10>>>16)+(mid>>>16))>>>0;
+}
+function philox4(c0,c1,c2,c3,k0,k1){
+  for(let r=0;r<10;r++){
+    if(r>0){ k0=(k0+PH_W0)>>>0; k1=(k1+PH_W1)>>>0; }
+    const lo0=Math.imul(PH_M0,c0)>>>0, hi0=mulhi32(PH_M0,c0);
+    const lo1=Math.imul(PH_M1,c2)>>>0, hi1=mulhi32(PH_M1,c2);
+    const n0=(hi1^c1^k0)>>>0, n2=(hi0^c3^k1)>>>0;
+    c0=n0; c1=lo1; c2=n2; c3=lo0;
+  }
+  return [c0,c1,c2,c3];
+}
+function noiseU(seed,stream,i,draw){ return (philox4(i>>>0,draw>>>0,0,0,seed>>>0,stream>>>0)[0]>>>8)*TWO_M24; }
+
+/* ---------- colormap ---------- */
+const STOPS = [[0,[14,26,58]],[0.3,[35,80,138]],[0.55,[78,156,192]],[0.8,[232,217,168]],[1,[255,247,230]]];
+const LUT = new Float32Array(256*4), LUT32 = new Uint32Array(256);
+for (let i=0;i<256;i++){
+  const t=i/255; let k=0; while(k<STOPS.length-2 && t>STOPS[k+1][0]) k++;
+  const [t0,c0]=STOPS[k], [t1,c1]=STOPS[k+1], u=(t-t0)/(t1-t0);
+  const c=c0.map((v,j)=>Math.round(v+(c1[j]-v)*u));
+  LUT[i*4]=c[0]/255; LUT[i*4+1]=c[1]/255; LUT[i*4+2]=c[2]/255; LUT[i*4+3]=1;
+  LUT32[i]=(255<<24)|(c[2]<<16)|(c[1]<<8)|c[0];
+}
+
+/* ---------- CPU FFT (double-precision butterflies, used for init and CPU engine) ---------- */
+function makeFFT(N){
+  const logN=Math.round(Math.log2(N)), rev=new Uint32Array(N);
+  for(let i=0;i<N;i++){let r=0,x=i;for(let b=0;b<logN;b++){r=(r<<1)|(x&1);x>>=1;}rev[i]=r;}
+  const cs=new Float64Array(N/2), sn=new Float64Array(N/2);
+  for(let k=0;k<N/2;k++){cs[k]=Math.cos(2*Math.PI*k/N); sn[k]=-Math.sin(2*Math.PI*k/N);}
+  const tr=new Float64Array(N), ti=new Float64Array(N);
+  function f1(re,im,off,stride,sign){
+    for(let i=0;i<N;i++){const j=rev[i],p=off+i*stride; tr[j]=re[p]; ti[j]=im[p];}
+    for(let size=2,step=N>>1; size<=N; size<<=1, step>>=1){
+      const half=size>>1;
+      for(let s0=0;s0<N;s0+=size){
+        for(let k=0,t=0;k<half;k++,t+=step){
+          const wr=cs[t], wi=sign*sn[t], a=s0+k, b=a+half;
+          const xr=tr[b]*wr-ti[b]*wi, xi=tr[b]*wi+ti[b]*wr;
+          tr[b]=tr[a]-xr; ti[b]=ti[a]-xi; tr[a]+=xr; ti[a]+=xi;
+        }
+      }
+    }
+    for(let i=0;i<N;i++){const p=off+i*stride; re[p]=tr[i]; im[p]=ti[i];}
+  }
+  function f2(re,im,sign){ for(let y=0;y<N;y++) f1(re,im,y*N,1,sign); for(let x=0;x<N;x++) f1(re,im,x,N,sign); }
+  return { f2, cs, sn };
+}
+let fftCache=null;
+function getFFT(N){ if(!fftCache||fftCache.N!==N){ fftCache={N,fft:makeFFT(N)}; } return fftCache.fft; }
+
+/* ---------- ETD1 coefficients, double precision, stored f32 interleaved [E, Phi/NN] ---------- */
+function buildCoefs(N,dx,r,C,dt,fd,Arr=Float32Array){
+  const NN=N*N, out=new Arr(2*NN), inv=1/NN, idx2=1/(dx*dx);
+  const c=new Float64Array(N), k=new Float64Array(N);
+  for(let m=0;m<N;m++){ c[m]=Math.cos(2*Math.PI*m/N); const ms=m<=N/2?m:m-N; k[m]=2*Math.PI*ms/(N*dx); }
+  for(let n=0;n<N;n++) for(let m=0;m<N;m++){
+    const i=n*N+m;
+    let K2 = fd ? (10/3 - (4/3)*(c[m]+c[n]) - (2/3)*c[m]*c[n])*idx2 : k[m]*k[m]+k[n]*k[n];
+    if(i===0 || K2<0) K2=0;
+    const q=1-K2, L=-K2*(r+q*q+C), x=L*dt;
+    out[2*i]=Math.exp(x);
+    const phi = L!==0 ? Math.expm1(x)/L : dt;
+    out[2*i+1] = -K2*phi*inv;
+  }
+  return out;
+}
+
+/* ---------- hot initial state, returned as normalized spectrum F(psi)/NN ---------- */
+function quenchSpectrum(N,psibar,A,seed){
+  const NN=N*N, re=new Float64Array(NN), im=new Float64Array(NN);
+  for(let i=0;i<NN;i++) re[i]=A*(2*noiseU(seed,0,i,0)-1);
+  getFFT(N).f2(re,im,1);
+  const out=new Float64Array(2*NN), inv=1/NN;
+  for(let i=0;i<NN;i++){ out[2*i]=re[i]*inv; out[2*i+1]=im[i]*inv; }
+  out[0]=psibar; out[1]=0;
+  return out;
+}
+
+/* ---------- crystal seeds and vacancy selection (shared by both engines) ---------- */
+function q0For(fd){ return fd ? Math.acos(1-DX*DX/2)/DX : 1; }  // where the operator's K^2 = 1 along an axis
+function hexAmplitude(r,pb){  // one-mode triangular amplitude: minimize the one-mode free energy over A
+  const M=48, pts=[], q=[[1,0],[-0.5,Math.sqrt(3)/2],[-0.5,-Math.sqrt(3)/2]], Lx=4*Math.PI, Ly=4*Math.PI/Math.sqrt(3);
+  for(let a=0;a<M;a++) for(let b=0;b<M;b++){ const x=(a+0.5)/M*Lx, y=(b+0.5)/M*Ly; let s=0; for(const v of q) s+=Math.cos(v[0]*x+v[1]*y); pts.push(s); }
+  const f=A=>{ let q4=0; for(const s of pts){ const p=pb+A*s; q4+=p*p*p*p; } return 0.75*r*A*A+0.25*q4/pts.length; };
+  let best=0, fb=f(0); for(let A=-1;A<=1;A+=0.0025){ const v=f(A); if(v<fb){ fb=v; best=A; } }
+  return best===0 ? (pb<=0?0.25:-0.25) : best;
+}
+function hexVectors(N,q0,theta){  // rounded to the box's reciprocal lattice so the crystal is periodic
+  const dk=2*Math.PI/(N*DX), rd=v=>Math.round(v/dk)*dk;
+  const q1=[rd(q0*Math.cos(theta)), rd(q0*Math.sin(theta))];
+  const q2=[rd(q0*Math.cos(theta+2*Math.PI/3)), rd(q0*Math.sin(theta+2*Math.PI/3))];
+  return [q1,q2,[-q1[0]-q2[0],-q1[1]-q2[1]]];
+}
+function crystalSpectrum(N,r,pb,fd,thetaDeg){  // thetaDeg null: single crystal; else grain 2 in the middle half
+  const NN=N*N, re=new Float64Array(NN), im=new Float64Array(NN), A=hexAmplitude(r,pb), q0=q0For(fd);
+  const G1=hexVectors(N,q0,0), G2=thetaDeg==null?null:hexVectors(N,q0,thetaDeg*Math.PI/180);
+  for(let y=0;y<N;y++) for(let x=0;x<N;x++){
+    const G = (G2 && y>=N/4 && y<3*N/4) ? G2 : G1, X=x*DX, Y=y*DX;
+    let v=0; for(const q of G) v+=Math.cos(q[0]*X+q[1]*Y);
+    re[y*N+x]=A*v;
+  }
+  getFFT(N).f2(re,im,1);
+  const out=new Float64Array(2*NN), inv=1/NN;
+  for(let i=0;i<NN;i++){ out[2*i]=re[i]*inv; out[2*i+1]=im[i]*inv; }
+  out[0]=pb; out[1]=0;
+  return {spec:out, m:(Math.abs(pb)+3*Math.abs(A))**2};
+}
+/* Each cell finds the nearest local maximum of psi within 4 cells (an atom). If that atom is selected
+   (Philox stream 6, counter (atom cell, punch)), the cell's density above the mean is removed. */
+function vacancyDelta(psi,N,pb,conc,seed,event,out){
+  const at=(x,y)=>psi[((y%N+N)%N)*N+((x%N+N)%N)];
+  const isMax=(x,y)=>{ const c=at(x,y); if(c<pb+0.1) return false;
+    for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ if(!dx&&!dy) continue;
+      const o=at(x+dx,y+dy); if(o>c||(o===c&&dy*3+dx>0)) return false; }
+    return true; };
+  for(let y=0;y<N;y++) for(let x=0;x<N;x++){
+    let best=1000, bx=0, by=0;
+    for(let oy=-4;oy<=4;oy++) for(let ox=-4;ox<=4;ox++){
+      const d2=ox*ox+oy*oy; if(d2<best && d2<=20 && isMax(x+ox,y+oy)){ best=d2; bx=x+ox; by=y+oy; }
+    }
+    let d=0;
+    if(best<1000){ const j=((by%N+N)%N)*N+((bx%N+N)%N); if(noiseU(seed,6,j,event)<conc) d=-Math.max(at(x,y)-pb,0); }
+    out[y*N+x]=d;
+  }
+}
+
+/* ---------- gallery presets: initial states that relax into specific structures ---------- */
+function makeField(N,fn){ const f=new Float64Array(N*N); for(let y=0;y<N;y++) for(let x=0;x<N;x++) f[y*N+x]=fn(x,y); return f; }
+function hexSum(G,x,y){ let v=0; for(const q of G) v+=Math.cos(q[0]*x*DX+q[1]*y*DX); return v; }
+function hexVectorsX(N,q0,theta){  // x-components fitted to the box only: for grains that do not wrap in y
+  const dk=2*Math.PI/(N*DX), rd=v=>Math.round(v/dk)*dk, t2=theta+2*Math.PI/3;
+  const q1=[rd(q0*Math.cos(theta)), q0*Math.sin(theta)], q2=[rd(q0*Math.cos(t2)), q0*Math.sin(t2)];
+  return [q1,q2,[-q1[0]-q2[0],-q1[1]-q2[1]]];
+}
+function misorientation(G1,G2){ let s=0; for(let j=0;j<3;j++){ let d=(Math.atan2(G2[j][1],G2[j][0])-Math.atan2(G1[j][1],G1[j][0]))*180/Math.PI; s+=((((d+30)%60)+60)%60)-30; } return Math.abs(s/3); }
+function localMaxima(f,N,thr){ const out=[], at=(x,y)=>f[((y%N+N)%N)*N+((x%N+N)%N)];
+  for(let y=0;y<N;y++) for(let x=0;x<N;x++){ const v=at(x,y); if(v<thr) continue; let ok=true;
+    for(let dy=-1;dy<=1&&ok;dy++) for(let dx=-1;dx<=1;dx++){ if(!dx&&!dy) continue; const o=at(x+dx,y+dy); if(o>v||(o===v&&dy*3+dx>0)){ ok=false; break; } }
+    if(ok) out.push([x,y]); } return out; }
+const pdist=(N,a,b)=>{ let dx=Math.abs(a[0]-b[0]), dy=Math.abs(a[1]-b[1]); dx=Math.min(dx,N-dx); dy=Math.min(dy,N-dy); return Math.hypot(dx,dy); };
+function vacancyField(N,r,pb,count){  // remove `count` atoms: the one nearest the centre, then its nearest neighbours in order
+  const G=hexVectors(N,q0For(true),0), A=hexAmplitude(r,pb), f=makeField(N,(x,y)=>pb+A*hexSum(G,x,y));
+  const atoms=localMaxima(f,N,pb+0.1), c=[N/2,N/2];
+  atoms.sort((a,b)=>pdist(N,a,c)-pdist(N,b,c));
+  const centre=atoms[0], removed=[centre];
+  const rest=atoms.slice(1).sort((a,b)=>pdist(N,a,centre)-pdist(N,b,centre));
+  if(count===3){ removed.push(rest[0]); removed.push(rest.slice(1).find(a=>Math.abs(pdist(N,a,rest[0])-pdist(N,centre,rest[0]))<1.5)); }
+  else for(let k=1;k<count;k++) removed.push(rest[k-1]);
+  const a=4*Math.PI/(Math.sqrt(3)*q0For(true))/DX, rad=0.45*a;
+  for(const [ax,ay] of removed) for(let dy=-Math.ceil(rad);dy<=Math.ceil(rad);dy++) for(let dx=-Math.ceil(rad);dx<=Math.ceil(rad);dx++){
+    if(dx*dx+dy*dy>rad*rad) continue; const i=((ay+dy+N)%N)*N+((ax+dx+N)%N); f[i]=Math.min(f[i],pb); }
+  return f;
+}
+function bicrystalField(N,r,pb,deg){
+  const q0=q0For(true), G1=hexVectors(N,q0,0), G2=hexVectorsX(N,q0,deg*Math.PI/180), A=hexAmplitude(r,pb);
+  return { f:makeField(N,(x,y)=>pb+A*hexSum((y>=N/4&&y<3*N/4)?G2:G1,x,y)), angle:misorientation(G1,G2) };
+}
+const COEX={ r:-0.5, liquid:-0.523, solid:-0.43 };
+function interfaceField(N,sd,theta=0){  // sd(x,y) < 0 inside the solid
+  const G=hexVectors(N,q0For(true),0), A=hexAmplitude(COEX.r,COEX.solid), {liquid:pl, solid:ps}=COEX;
+  return makeField(N,(x,y)=>{ const X=x-N/2, Y=y-N/2, c=Math.cos(theta), s=Math.sin(theta);
+    const m=0.5*(1-Math.tanh(sd(c*X+s*Y,-s*X+c*Y)/2)); return pl+m*(ps-pl+A*hexSum(G,x,y)); });
+}
+const hexDist=(x,y)=>{ let m=0; for(let k=0;k<3;k++){ const t=k*Math.PI/3; m=Math.max(m,Math.abs(x*Math.cos(t)+y*Math.sin(t))); } return m; };
+function dipoleField(N,r,pb,phiDeg=0){  // edge-dislocation pair, Burgers vector along y. phi = 0: cores on one glide line (along y);
+  // phi > 0: the separation vector is rotated by phi about the midpoint, same distance, so the glide lines are offset
+  const G=hexVectors(N,q0For(true),0), A=hexAmplitude(r,pb), by=2*Math.PI/G[1][1], ph=phiDeg*Math.PI/180, h=0.2*N;
+  const mx=N/2+0.37, my=N/2+0.21, c1=[mx-h*Math.sin(ph),my-h*Math.cos(ph)], c2=[mx+h*Math.sin(ph),my+h*Math.cos(ph)];
+  return makeField(N,(x,y)=>{ const uy=by/(2*Math.PI)*(Math.atan2(y-c1[1],x-c1[0])-Math.atan2(y-c2[1],x-c2[0]));
+    let v=0; for(const q of G) v+=Math.cos(q[0]*x*DX+q[1]*(y*DX-uy)); return pb+A*v; });
+}
+function ringGrainField(N,r,pb,deg,Rfrac){  // circular grain rotated by deg inside an unrotated matrix
+  const q0=q0For(true), G1=hexVectors(N,q0,0), th=deg*Math.PI/180, A=hexAmplitude(r,pb), R=Rfrac*N;
+  const G2=[0,1,2].map(j=>[q0*Math.cos(th+2*Math.PI*j/3), q0*Math.sin(th+2*Math.PI*j/3)]);
+  return makeField(N,(x,y)=>pb+A*hexSum(Math.hypot(x-N/2,y-N/2)<R?G2:G1,x,y));
+}
+function polycrystalField(N,r,pb,K,seed){
+  const q0=q0For(true), A=hexAmplitude(r,pb), seeds=[];
+  for(let k=0;k<K;k++) seeds.push({x:noiseU(seed,7,k,0)*N, y:noiseU(seed,7,k,1)*N, G:null, th:noiseU(seed,7,k,2)*Math.PI/3});
+  for(const s of seeds){ const t=s.th; s.G=[0,1,2].map(j=>[q0*Math.cos(t+2*Math.PI*j/3), q0*Math.sin(t+2*Math.PI*j/3)]); }
+  return makeField(N,(x,y)=>{ let best=null, bd=1e9; for(const s of seeds){ const d=pdist(N,[x,y],[s.x,s.y]); if(d<bd){ bd=d; best=s; } }
+    return pb+A*hexSum(best.G,x,y); });
+}
+const PRESETS=[
+  {group:'Hot quench', id:'rand', title:'Random', r:-0.25, pb:-0.25, range:0.7, sub:'Noise from the current seed',
+   gen(N){ const f=makeField(N,(x,y)=>S.A*(2*noiseU(S.seed,0,y*N+x,0)-1)); let m=0; for(const v of f) m+=v; m/=N*N;
+     for(let i=0;i<f.length;i++) f[i]+=this.pb-m; return f; },
+   look:'Uniform noise around ψ̄ = −0.25 at r = −0.25, with the noise amplitude from the Quench panel and Philox stream 0 of the current seed, the same start as the simple PFC page. It crystallizes into a polycrystal that coarsens: in Fourier space a diffuse ring breaks into arcs, then spots. New seed gives a different start; Reset repeats this one exactly.'},
+  {group:'Grain boundaries', id:'gb5', title:'Low-angle boundary', deg:5, r:-0.5, pb:-0.35, range:0.8,
+   param:{key:'deg', label:'Misorientation', min:1, max:15, step:0.5, unit:'°'},
+   gen(N){ const b=bicrystalField(N,this.r,this.pb,this.deg); this.sub=`${b.angle.toFixed(1)}° tilt`; return b.f; },
+   look:'Each boundary breaks up into a row of separate edge dislocations, spaced about b/θ apart, so smaller angles give fewer, more widely spaced dislocations. In Fourier space the two spot sets nearly overlap: each spot splits into a close pair joined by a short arc.'},
+  {group:'Grain boundaries', id:'gb13', title:'Σ19 boundary', deg:13.17, r:-0.5, pb:-0.35, range:0.8,
+   gen(N){ const b=bicrystalField(N,this.r,this.pb,this.deg); this.sub=`${b.angle.toFixed(1)}° (13.17° ideal)`; return b.f; },
+   look:'Dislocation cores crowd together into a periodic boundary structure. Fourier space shows two clearly separated hexagons of spots, 13° apart, with faint arcs between partners.'},
+  {group:'Grain boundaries', id:'gb22', title:'Σ7 boundary', deg:21.79, r:-0.5, pb:-0.35, range:0.8,
+   gen(N){ const b=bicrystalField(N,this.r,this.pb,this.deg); this.sub=`${b.angle.toFixed(1)}° (21.79° ideal)`; return b.f; },
+   look:'A coincidence-site boundary: every seventh site is shared by both grains, giving a short, regular repeat of structural units along the boundary. Two hexagons of spots 22° apart.'},
+  {group:'Grain boundaries', id:'gb28', title:'Σ13 boundary', deg:27.80, r:-0.5, pb:-0.35, range:0.8,
+   gen(N){ const b=bicrystalField(N,this.r,this.pb,this.deg); this.sub=`${b.angle.toFixed(1)}° (27.80° ideal)`; return b.f; },
+   look:'A high-angle boundary close to the 30° maximum: the two spot hexagons interleave almost evenly, giving twelve nearly equally spaced spots on the ring.'},
+  {group:'Point defects', id:'v1', title:'Single vacancy', n:1, r:-1.0, pb:-0.5, range:1.2, sub:'r = −1.0',
+   gen(N){ return vacancyField(N,this.r,this.pb,1); },
+   look:'At this undercooling the empty site stays empty. Its neighbours relax inward slightly. In Fourier space use Long averaging and 8+ decades: a faint flat haze appears, with weak lobes beside each Bragg spot along its radial direction.'},
+  {group:'Point defects', id:'v2', title:'Divacancy', n:2, r:-1.0, pb:-0.5, range:1.2, sub:'Two neighbouring sites',
+   gen(N){ return vacancyField(N,this.r,this.pb,2); },
+   look:'Two adjacent empty sites. Watch whether they stay bound or split apart. The diffuse haze is about twice the single-vacancy level.'},
+  {group:'Point defects', id:'v3', title:'Trivacancy', n:3, r:-1.0, pb:-0.5, range:1.2, sub:'Triangle of sites',
+   gen(N){ return vacancyField(N,this.r,this.pb,3); },
+   look:'Three mutually neighbouring empty sites. Watch whether the triangle stays compact or rearranges; in my headless runs it held to t = 1000.'},
+  {group:'Point defects', id:'v7', title:'Vacancy pool', n:7, r:-1.0, pb:-0.5, range:1.2, sub:'Seven sites',
+   gen(N){ return vacancyField(N,this.r,this.pb,7); },
+   look:'A hexagonal pool of seven missing atoms. Larger clusters scatter coherently: watch for extra intensity near k = 0 (small-angle scattering), which single vacancies do not produce.'},
+  {group:'Point defects', id:'v19', title:'Void', n:19, r:-1.0, pb:-0.5, range:1.2, sub:'Nineteen sites',
+   gen(N){ return vacancyField(N,this.r,this.pb,19); },
+   look:'Two shells of missing atoms. Watch whether the void stays open, shrinks or turns into a dislocation loop. Small-angle scattering near k = 0 is strongest here.'},
+  {group:'Solid–liquid interfaces', id:'isl', title:'Round island', r:COEX.r, pb:null, range:0.6, sub:'In its own melt',
+   gen(N){ return interfaceField(N,(x,y)=>Math.hypot(x,y)-N*0.25); },
+   look:'Crystal and liquid at coexistence (r = −0.5). The island settles to about 19% of the area and reshapes toward its equilibrium form. Fourier space shows the liquid’s diffuse ring under the island’s Bragg spots, plus rings of small-angle scattering from the island’s outline near k = 0.'},
+  {group:'Solid–liquid interfaces', id:'hex', title:'Hex island', r:COEX.r, pb:null, range:0.6, sub:'Facets on close-packed rows',
+   gen(N){ return interfaceField(N,(x,y)=>hexDist(x,y)-N*0.23); },
+   look:'Facets lie along the close-packed atomic rows. Near k = 0 and around each Bragg spot, the straight edges produce streaks perpendicular to the facets.'},
+  {group:'Solid–liquid interfaces', id:'hexr', title:'Misaligned hex island', r:COEX.r, pb:null, range:0.6, sub:'Facets 15° off the rows',
+   gen(N){ return interfaceField(N,(x,y)=>hexDist(x,y)-N*0.23,15*Math.PI/180); },
+   look:'The same shape cut 15° off the lattice rows. Watch whether the edges roughen or turn back toward the lattice directions; the streaks near k = 0 rotate with them.'},
+  {group:'Solid–liquid interfaces', id:'pool', title:'Liquid pool', r:COEX.r, pb:null, range:0.6, sub:'Melt inside the crystal',
+   gen(N){ return interfaceField(N,(x,y)=>N*0.2-Math.hypot(x,y)); },
+   look:'A pocket of melt inside the crystal. It grows a little, then holds at about 20% of the area. Same signatures as the island, weighted the other way.'},
+  {group:'Line defects and grains', id:'dip', title:'Dislocation dipole', r:-0.5, pb:-0.35, range:0.8, phi:0,
+   param:{key:'phi', label:'Pair angle from the glide line', min:0, max:90, step:5, unit:'°'},
+   gen(N){ this.sub = this.phi===0 ? 'Pair on one glide line' : `Pair at ${this.phi}° to the glide line`; return dipoleField(N,this.r,this.pb,this.phi); },
+   look:'Two edge dislocations of opposite sign, a fixed distance apart. At 0° they share a glide line, glide toward each other and annihilate. At other angles their glide lines are offset, so meeting also takes climb; PFC allows climb readily because it conserves density, not atom number. In headless runs at 128², pairs at 0°, 20°, 45° and 90° all annihilated by t ≈ 4000. Each Bragg spot is broadened by the strain field and sharpens once the pair is gone.'},
+  {group:'Line defects and grains', id:'ring', title:'Dislocation ring', r:-0.5, pb:-0.35, range:0.8, deg:8, Rf:0.3,
+   param:{key:'deg', label:'Grain misorientation', min:2, max:30, step:1, unit:'°'},
+   gen(N){ const b=4*Math.PI/(Math.sqrt(3)*q0For(true)), R=this.Rf*N*DX, n=Math.round(2*Math.PI*R*this.deg*Math.PI/180/b);
+     this.sub=`${this.deg}° grain, about ${n} dislocation${n===1?'':'s'}`; return ringGrainField(N,this.r,this.pb,this.deg,this.Rf); },
+   look:'A circular grain rotated inside the matrix. At small angles its boundary is a closed ring of discrete edge dislocations, about 2πRθ/b of them; above roughly 15° the cores merge into a continuous high-angle boundary. Line tension shrinks the ring, and in PFC the grain rotates as it shrinks. In Fourier space a weaker spot set sits θ from each matrix spot and fades as the grain disappears; at 8° and 256² its intensity fell from 0.42 to 0.19 of the matrix spots by t = 4000 in a headless run.'},
+  {group:'Line defects and grains', id:'poly', title:'Polycrystal', r:-0.5, pb:-0.35, range:0.8, sub:'Ten random grains',
+   gen(N){ return polycrystalField(N,this.r,this.pb,10,S.seed); },
+   look:'Ten grains with random orientations from the current seed. Boundaries migrate and small grains shrink away. On the ring, spot sets merge into fewer, sharper ones as the grains coarsen.'},
+];
+
+/* ---------- CPU engine ---------- */
+function makeCPU(canvas,f64){
+  const ctx=canvas.getContext('2d');
+  const Arr=f64?Float64Array:Float32Array;
+  const B={name:f64?'CPU f64':'CPU f32', gen:0, onStats:null, coefType:Arr};
+  let N,NN,fft,h,wr,wi,psiR,bre,bim,coef,C=1,img,px,sk;
+  B.init=async n=>{
+    N=n; NN=n*n; fft=getFFT(n);
+    h=new Arr(2*NN); wr=new Arr(NN); wi=new Arr(NN);
+    psiR=new Arr(NN); bre=new Float64Array(NN); bim=new Float64Array(NN); sk=new Float64Array(NN);
+    canvas.width=n; canvas.height=n; img=ctx.createImageData(n,n); px=new Uint32Array(img.data.buffer);
+  };
+  B.setState=spec=>{ h.set(spec); };
+  B.setCoefs=(cf,c)=>{ coef=cf; C=c; };
+  B.setPsibar=v=>{ h[0]=v; h[1]=0; };
+  function step(){
+    for(let i=0;i<NN;i++){ wr[i]=h[2*i]; wi[i]=h[2*i+1]; }
+    fft.f2(wr,wi,-1);
+    let m=0, bad=false;
+    for(let i=0;i<NN;i++){
+      const p=wr[i]; psiR[i]=p; const pp=p*p;
+      if(pp>m) m=pp; else if(pp!==pp) bad=true;
+      wr[i]=p*(pp-C); wi[i]=0;
+    }
+    fft.f2(wr,wi,1);
+    for(let i=0;i<NN;i++){
+      const e=coef[2*i], q=coef[2*i+1];
+      h[2*i]=e*h[2*i]+q*wr[i]; h[2*i+1]=e*h[2*i+1]+q*wi[i];
+    }
+    return bad?Infinity:m;
+  }
+  function brush(b){
+    bre.fill(0); bim.fill(0);
+    const R=b.R, r2=b.rad*b.rad, fx=Math.floor(b.cx), fy=Math.floor(b.cy);
+    for(let oy=-R;oy<=R;oy++) for(let ox=-R;ox<=R;ox++){
+      const x=((fx+ox)%N+N)%N, y=((fy+oy)%N+N)%N, i=y*N+x;
+      const ddx=ox+0.5-(b.cx-fx), ddy=oy+0.5-(b.cy-fy);
+      bre[i]=b.amp*Math.exp(-(ddx*ddx+ddy*ddy)/r2)*(2*noiseU(b.seed,1,i,b.event)-1);
+    }
+    inject();
+  }
+  function inject(){  // add the real field in bre to the state, skipping k = 0 so mass is conserved
+    bim.fill(0); fft.f2(bre,bim,1);
+    const inv=1/NN;
+    for(let i=1;i<NN;i++){ h[2*i]+=bre[i]*inv; h[2*i+1]+=bim[i]*inv; }
+  }
+  function punch(v){ vacancyDelta(psiR,N,v.pb,v.conc,v.seed,v.event,bre); inject(); }
+  B.frame=(n,b,view)=>{
+    const t0=performance.now(); let done=0, m=0, smax=0;
+    if(b) brush(b);
+    if(view.vac) punch(view.vac);
+    while(done<n){ const mm=step(); if(mm>m||mm===Infinity) m=mm; done++; if(performance.now()-t0>14) break; }
+    if(done>0){
+      const a=view.alpha;
+      sk[0]=0;
+      for(let i=1;i<NN;i++){ const v=sk[i]+a*(h[2*i]*h[2*i]+h[2*i+1]*h[2*i+1]-sk[i]); sk[i]=v; if(v>smax) smax=v; }
+    }
+    if(view.mode===1){
+      const W=view.W, span=2*W+1, lo=view.logMax-view.decades, R0=view.q0px*N/span, c0=(W+0.5)*N/span;
+      for(let y=0;y<N;y++){
+        const ky=Math.floor((y+0.5)/N*span)-W, row=((ky%N+N)%N)*N;
+        for(let x=0;x<N;x++){
+          const kx=Math.floor((x+0.5)/N*span)-W, v=sk[row+((kx%N+N)%N)];
+          let t=((Math.log10(v>1e-30?v:1e-30)-lo)/view.decades*255+0.5)|0; t=t<0?0:t>255?255:t;
+          let col=LUT32[t];
+          if(view.rings){ const rs=Math.hypot(x+0.5-c0,y+0.5-c0);
+            if(Math.abs(rs-R0)<0.6||Math.abs(rs-R0*Math.sqrt(3))<0.6) col=0xFF8C8C8C; }
+          px[y*N+x]=col;
+        }
+      }
+    } else {
+      const s=255/(view.hi-view.lo);
+      for(let i=0;i<NN;i++){ let t=((psiR[i]-view.lo)*s+0.5)|0; t=t<0?0:t>255?255:t; px[i]=LUT32[t]; }
+    }
+    ctx.putImageData(img,0,0);
+    if(done>0 && B.onStats) B.onStats(m,B.gen,smax);
+    return done;
+  };
+  B._psi=()=>psiR; B._h=()=>h; B._sk=()=>sk;
+  B.readSK=()=>Promise.resolve(sk);
+  B.destroy=()=>{};
+  return B;
+}
+
+/* ---------- WebGPU engine ---------- */
+function fftWGSL(N,sign){
+  const logN=Math.round(Math.log2(N)), WG=Math.min(256,N/2);
+  return `
+const N:u32=${N}u; const LOGN:u32=${logN}u; const WG:u32=${WG}u; const SIGN:f32=${sign}.0;
+@group(0) @binding(0) var<storage,read> src: array<vec2f>;
+@group(0) @binding(1) var<storage,read_write> dst: array<vec2f>;
+@group(0) @binding(2) var<storage,read> tw: array<vec2f>;
+var<workgroup> s: array<vec2f, ${N}>;
+@compute @workgroup_size(${WG})
+fn main(@builtin(workgroup_id) wg: vec3u, @builtin(local_invocation_index) li: u32) {
+  let row = wg.x;
+  let base = row * N;
+  for (var i = li; i < N; i += WG) { s[reverseBits(i) >> (32u - LOGN)] = src[base + i]; }
+  workgroupBarrier();
+  for (var st = 0u; st < LOGN; st++) {
+    let m = 1u << st;
+    for (var j = li; j < N / 2u; j += WG) {
+      let k = j & (m - 1u);
+      let i0 = ((j >> st) << (st + 1u)) + k;
+      let i1 = i0 + m;
+      var w = tw[k << (LOGN - 1u - st)];
+      w.y = w.y * SIGN;
+      let a = s[i0];
+      let b = s[i1];
+      let t = vec2f(w.x * b.x - w.y * b.y, w.x * b.y + w.y * b.x);
+      s[i0] = a + t;
+      s[i1] = a - t;
+    }
+    workgroupBarrier();
+  }
+  for (var i = li; i < N; i += WG) { dst[i * N + row] = s[i]; }
+}`;
+}
+const PRM = `struct Prm { C: f32, NN: u32, invNN: f32, pad: f32 };`;
+const NL_WGSL = PRM + `
+@group(0) @binding(0) var<storage, read> psi: array<vec2f>;
+@group(0) @binding(1) var<storage, read_write> g: array<vec2f>;
+@group(0) @binding(2) var<storage, read_write> psiR: array<f32>;
+@group(0) @binding(3) var<storage, read_write> stats: array<atomic<u32>>;
+@group(0) @binding(4) var<uniform> prm: Prm;
+var<workgroup> wm: atomic<u32>;
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u, @builtin(local_invocation_index) li: u32) {
+  if (li == 0u) { atomicStore(&wm, 0u); }
+  workgroupBarrier();
+  let i = gid.x;
+  if (i < prm.NN) {
+    let p = psi[i].x;
+    psiR[i] = p;
+    let pp = p * p;
+    g[i] = vec2f(p * (pp - prm.C), 0.0);
+    atomicMax(&wm, bitcast<u32>(pp));
+  }
+  workgroupBarrier();
+  if (li == 0u) { atomicMax(&stats[0], atomicLoad(&wm)); }
+}`;
+const UPD_WGSL = PRM + `
+@group(0) @binding(0) var<storage, read_write> h: array<vec2f>;
+@group(0) @binding(1) var<storage, read> g: array<vec2f>;
+@group(0) @binding(2) var<storage, read> cf: array<vec2f>;
+@group(0) @binding(3) var<uniform> prm: Prm;
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u) {
+  let i = gid.x;
+  if (i >= prm.NN) { return; }
+  let c = cf[i];
+  h[i] = c.x * h[i] + c.y * g[i];
+}`;
+const INJ_WGSL = PRM + `
+@group(0) @binding(0) var<storage, read_write> h: array<vec2f>;
+@group(0) @binding(1) var<storage, read> g: array<vec2f>;
+@group(0) @binding(2) var<uniform> prm: Prm;
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u) {
+  let i = gid.x;
+  if (i >= prm.NN || i == 0u) { return; }
+  h[i] = h[i] + g[i] * prm.invNN;
+}`;
+const PHILOX_WGSL = `
+fn mulhi(a: u32, c: u32) -> u32 {
+  let a0 = a & 0xffffu; let a1 = a >> 16u; let c0 = c & 0xffffu; let c1 = c >> 16u;
+  let p00 = a0 * c0; let p01 = a0 * c1; let p10 = a1 * c0; let p11 = a1 * c1;
+  let mid = (p00 >> 16u) + (p01 & 0xffffu) + (p10 & 0xffffu);
+  return p11 + (p01 >> 16u) + (p10 >> 16u) + (mid >> 16u);
+}
+fn philox0(ctr: vec4u, key: vec2u) -> u32 {
+  var c = ctr;
+  var k = key;
+  for (var r = 0u; r < 10u; r++) {
+    if (r > 0u) { k = k + vec2u(0x9E3779B9u, 0xBB67AE85u); }
+    let lo0 = 0xD2511F53u * c.x; let hi0 = mulhi(0xD2511F53u, c.x);
+    let lo1 = 0xCD9E8D57u * c.z; let hi1 = mulhi(0xCD9E8D57u, c.z);
+    c = vec4u(hi1 ^ c.y ^ k.x, lo1, hi0 ^ c.w ^ k.y, lo0);
+  }
+  return c.x;
+}`;
+const BRUSH_WGSL = `
+struct Br { cx: f32, cy: f32, rad: f32, amp: f32, seed: u32, N: u32, event: u32, R: u32 };
+@group(0) @binding(0) var<storage, read_write> outp: array<vec2f>;
+@group(0) @binding(1) var<uniform> b: Br;
+` + PHILOX_WGSL + `
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u) {
+  let NN = b.N * b.N;
+  let i = gid.x;
+  if (i >= NN) { return; }
+  let n = i32(b.N);
+  let R = i32(b.R);
+  let fx = floor(b.cx);
+  let fy = floor(b.cy);
+  var ox = i32(i % b.N) - i32(fx);
+  var oy = i32(i / b.N) - i32(fy);
+  ox = ((ox + n / 2) % n + n) % n - n / 2;
+  oy = ((oy + n / 2) % n + n) % n - n / 2;
+  if (abs(ox) > R || abs(oy) > R) { outp[i] = vec2f(0.0, 0.0); return; }
+  let dx = f32(ox) + 0.5 - (b.cx - fx);
+  let dy = f32(oy) + 0.5 - (b.cy - fy);
+  let m = exp(-(dx * dx + dy * dy) / (b.rad * b.rad));
+  let u = f32(philox0(vec4u(i, b.event, 0u, 0u), vec2u(b.seed, 1u)) >> 8u) * 5.9604644775390625e-8;
+  outp[i] = vec2f(b.amp * m * (2.0 * u - 1.0), 0.0);
+}`;
+const SK_WGSL = `
+struct Sk { alpha: f32, NN: u32, p0: u32, p1: u32 };
+@group(0) @binding(0) var<storage, read> h: array<vec2f>;
+@group(0) @binding(1) var<storage, read_write> sk: array<f32>;
+@group(0) @binding(2) var<storage, read_write> stats: array<atomic<u32>>;
+@group(0) @binding(3) var<uniform> sp: Sk;
+var<workgroup> wm: atomic<u32>;
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u, @builtin(local_invocation_index) li: u32) {
+  if (li == 0u) { atomicStore(&wm, 0u); }
+  workgroupBarrier();
+  let i = gid.x;
+  if (i < sp.NN) {
+    var v = 0.0;
+    if (i != 0u) { let z = h[i]; v = mix(sk[i], dot(z, z), sp.alpha); }
+    sk[i] = v;
+    atomicMax(&wm, bitcast<u32>(v));
+  }
+  workgroupBarrier();
+  if (li == 0u) { atomicMax(&stats[1], atomicLoad(&wm)); }
+}`;
+const VAC_WGSL = `
+struct Vp { conc: f32, pb: f32, N: u32, seed: u32, event: u32, p0: u32, p1: u32, p2: u32 };
+@group(0) @binding(0) var<storage, read> psiR: array<f32>;
+@group(0) @binding(1) var<storage, read_write> outp: array<vec2f>;
+@group(0) @binding(2) var<uniform> vp: Vp;
+` + PHILOX_WGSL + `
+fn wrapi(v: i32) -> u32 { let n = i32(vp.N); return u32(((v % n) + n) % n); }
+fn at(x: i32, y: i32) -> f32 { return psiR[wrapi(y) * vp.N + wrapi(x)]; }
+fn isMax(x: i32, y: i32) -> bool {
+  let c = at(x, y);
+  if (c < vp.pb + 0.1) { return false; }
+  for (var dy = -1; dy <= 1; dy++) {
+    for (var dx = -1; dx <= 1; dx++) {
+      if (dx == 0 && dy == 0) { continue; }
+      let o = at(x + dx, y + dy);
+      if (o > c || (o == c && dy * 3 + dx > 0)) { return false; }
+    }
+  }
+  return true;
+}
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u) {
+  let i = gid.x;
+  if (i >= vp.N * vp.N) { return; }
+  let x = i32(i % vp.N);
+  let y = i32(i / vp.N);
+  var best = 1000;
+  var bx = 0;
+  var by = 0;
+  for (var oy = -4; oy <= 4; oy++) {
+    for (var ox = -4; ox <= 4; ox++) {
+      let d2 = ox * ox + oy * oy;
+      if (d2 < best && d2 <= 20 && isMax(x + ox, y + oy)) { best = d2; bx = x + ox; by = y + oy; }
+    }
+  }
+  var d = 0.0;
+  if (best < 1000) {
+    let j = wrapi(by) * vp.N + wrapi(bx);
+    let u = f32(philox0(vec4u(j, vp.event, 0u, 0u), vec2u(vp.seed, 6u)) >> 8u) * 5.9604644775390625e-8;
+    if (u < vp.conc) { d = -max(at(x, y) - vp.pb, 0.0); }
+  }
+  outp[i] = vec2f(d, 0.0);
+}`;
+const RENDER_WGSL = `
+struct R { lo: f32, hi: f32, N: u32, mode: u32, W: u32, logMax: f32, decades: f32, q0px: f32,
+           rings: f32, p0: f32, p1: f32, p2: f32 };
+@group(0) @binding(0) var<storage, read> psiR: array<f32>;
+@group(0) @binding(1) var<storage, read> lut: array<vec4f>;
+@group(0) @binding(2) var<uniform> rp: R;
+@group(0) @binding(3) var<storage, read> sk: array<f32>;
+@vertex fn vs(@builtin(vertex_index) vi: u32) -> @builtin(position) vec4f {
+  var p = array<vec2f, 3>(vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
+  return vec4f(p[vi], 0.0, 1.0);
+}
+@fragment fn fs(@builtin(position) pos: vec4f) -> @location(0) vec4f {
+  let x = min(u32(pos.x), rp.N - 1u);
+  let y = min(u32(pos.y), rp.N - 1u);
+  if (rp.mode == 1u) {
+    let n = i32(rp.N);
+    let W = i32(rp.W);
+    let span = f32(2 * W + 1);
+    let kx = i32(floor(pos.x / f32(rp.N) * span)) - W;
+    let ky = i32(floor(pos.y / f32(rp.N) * span)) - W;
+    let idx = u32(((ky % n) + n) % n) * rp.N + u32(((kx % n) + n) % n);
+    let s = max(sk[idx], 1e-30);
+    let t = clamp((log2(s) * 0.30103 - (rp.logMax - rp.decades)) / rp.decades, 0.0, 1.0);
+    var c = lut[u32(t * 255.0 + 0.5)].rgb;
+    if (rp.rings > 0.5) {
+      let c0 = (f32(W) + 0.5) * f32(rp.N) / span;
+      let rs = length(pos.xy - vec2f(c0, c0));
+      let R0 = rp.q0px * f32(rp.N) / span;
+      if (abs(rs - R0) < 0.6 || abs(rs - R0 * 1.7320508) < 0.6) { c = vec3f(0.55, 0.55, 0.55); }
+    }
+    return vec4f(c, 1.0);
+  }
+  let v = psiR[y * rp.N + x];
+  let t = clamp((v - rp.lo) / (rp.hi - rp.lo), 0.0, 1.0);
+  return vec4f(lut[u32(t * 255.0 + 0.5)].rgb, 1.0);
+}`;
+
+async function makeGPU(canvas){
+  if(!('gpu' in navigator)) return null;
+  const adapter=await navigator.gpu.requestAdapter({powerPreference:'high-performance'});
+  if(!adapter) return null;
+  const device=await adapter.requestDevice();
+  const ctx=canvas.getContext('webgpu');
+  if(!ctx){ device.destroy(); return null; }
+  const fmt=navigator.gpu.getPreferredCanvasFormat();
+  const U=GPUBufferUsage;
+  const B={name:'GPU f32', gen:0, onStats:null, device, coefType:Float32Array};
+  device.pushErrorScope('validation');
+  const comp=code=>device.createComputePipeline({layout:'auto',compute:{module:device.createShaderModule({code}),entryPoint:'main'}});
+  const P={ nl:comp(NL_WGSL), up:comp(UPD_WGSL), inj:comp(INJ_WGSL), br:comp(BRUSH_WGSL), sk:comp(SK_WGSL), vac:comp(VAC_WGSL) };
+  const rmod=device.createShaderModule({code:RENDER_WGSL});
+  P.render=device.createRenderPipeline({layout:'auto',
+    vertex:{module:rmod,entryPoint:'vs'}, fragment:{module:rmod,entryPoint:'fs',targets:[{format:fmt}]},
+    primitive:{topology:'triangle-list'}});
+  const err0=await device.popErrorScope();
+  if(err0){ device.destroy(); throw new Error(err0.message); }
+
+  let N,NN,buf={},bgs={},ring=[],fftF,fftI;
+  const mk=(size,usage)=>device.createBuffer({size,usage});
+  const bg=(pipe,list)=>device.createBindGroup({layout:pipe.getBindGroupLayout(0),
+    entries:list.map((b,i)=>({binding:i,resource:{buffer:b}}))});
+
+  B.init=async n=>{
+    for(const k in buf) buf[k].destroy(); buf={};
+    ring.forEach(r=>{ try{ r.buf.destroy(); }catch(e){} }); ring=[];
+    N=n; NN=n*n;
+    canvas.width=n; canvas.height=n;
+    ctx.configure({device,format:fmt,alphaMode:'opaque'});
+    device.pushErrorScope('validation');
+    const cx=NN*8;
+    buf.h=mk(cx,U.STORAGE|U.COPY_DST); buf.a=mk(cx,U.STORAGE); buf.b=mk(cx,U.STORAGE);
+    buf.psiR=mk(NN*4,U.STORAGE); buf.coef=mk(cx,U.STORAGE|U.COPY_DST);
+    buf.tw=mk(N*4,U.STORAGE|U.COPY_DST); buf.stats=mk(16,U.STORAGE|U.COPY_SRC|U.COPY_DST);
+    buf.prm=mk(16,U.UNIFORM|U.COPY_DST); buf.brush=mk(32,U.UNIFORM|U.COPY_DST);
+    buf.rprm=mk(48,U.UNIFORM|U.COPY_DST); buf.lut=mk(256*16,U.STORAGE|U.COPY_DST);
+    buf.sk=mk(NN*4,U.STORAGE|U.COPY_SRC); buf.skr=mk(NN*4,U.MAP_READ|U.COPY_DST); skBusy=false; buf.skp=mk(16,U.UNIFORM|U.COPY_DST); buf.vprm=mk(32,U.UNIFORM|U.COPY_DST);
+    for(let i=0;i<3;i++) ring.push({buf:mk(16,U.MAP_READ|U.COPY_DST),busy:false});
+    device.queue.writeBuffer(buf.lut,0,LUT);
+    const tw=new Float32Array(N); // N/2 complex twiddles exp(-2πik/N), computed in f64
+    for(let k=0;k<N/2;k++){ tw[2*k]=Math.cos(2*Math.PI*k/N); tw[2*k+1]=-Math.sin(2*Math.PI*k/N); }
+    device.queue.writeBuffer(buf.tw,0,tw);
+    fftF=comp(fftWGSL(N,1)); fftI=comp(fftWGSL(N,-1));
+    bgs.i1=bg(fftI,[buf.h,buf.a,buf.tw]); bgs.i2=bg(fftI,[buf.a,buf.b,buf.tw]);
+    bgs.nl=bg(P.nl,[buf.b,buf.a,buf.psiR,buf.stats,buf.prm]);
+    bgs.f1=bg(fftF,[buf.a,buf.b,buf.tw]); bgs.f2=bg(fftF,[buf.b,buf.a,buf.tw]);
+    bgs.up=bg(P.up,[buf.h,buf.a,buf.coef,buf.prm]);
+    bgs.br=bg(P.br,[buf.a,buf.brush]);
+    bgs.inj=bg(P.inj,[buf.h,buf.a,buf.prm]);
+    bgs.r=bg(P.render,[buf.psiR,buf.lut,buf.rprm,buf.sk]);
+    bgs.sk=bg(P.sk,[buf.h,buf.sk,buf.stats,buf.skp]);
+    bgs.vac=bg(P.vac,[buf.psiR,buf.a,buf.vprm]);
+    const err=await device.popErrorScope();
+    if(err) throw new Error(err.message);
+  };
+  B.setState=spec=>device.queue.writeBuffer(buf.h,0,new Float32Array(spec));
+  B.setPsibar=v=>device.queue.writeBuffer(buf.h,0,new Float32Array([v,0]));
+  B.setCoefs=(cf,C)=>{
+    const dv=new DataView(new ArrayBuffer(16));
+    dv.setFloat32(0,C,true); dv.setUint32(4,NN,true); dv.setFloat32(8,1/NN,true);
+    device.queue.writeBuffer(buf.prm,0,dv.buffer);
+    device.queue.writeBuffer(buf.coef,0,cf);
+  };
+  B.frame=(n,b,view)=>{
+    const rv=new DataView(new ArrayBuffer(48));
+    rv.setFloat32(0,view.lo,true); rv.setFloat32(4,view.hi,true); rv.setUint32(8,N,true); rv.setUint32(12,view.mode,true);
+    rv.setUint32(16,view.W,true); rv.setFloat32(20,view.logMax,true); rv.setFloat32(24,view.decades,true);
+    rv.setFloat32(28,view.q0px,true); rv.setFloat32(32,view.rings?1:0,true);
+    device.queue.writeBuffer(buf.rprm,0,rv.buffer);
+    const sv=new DataView(new ArrayBuffer(16)); sv.setFloat32(0,view.alpha,true); sv.setUint32(4,NN,true);
+    device.queue.writeBuffer(buf.skp,0,sv.buffer);
+    if(view.vac){
+      const v=new DataView(new ArrayBuffer(32));
+      v.setFloat32(0,view.vac.conc,true); v.setFloat32(4,view.vac.pb,true); v.setUint32(8,N,true);
+      v.setUint32(12,view.vac.seed,true); v.setUint32(16,view.vac.event,true);
+      device.queue.writeBuffer(buf.vprm,0,v.buffer);
+    }
+    if(b){
+      const d=new DataView(new ArrayBuffer(32));
+      d.setFloat32(0,b.cx,true); d.setFloat32(4,b.cy,true); d.setFloat32(8,b.rad,true); d.setFloat32(12,b.amp,true);
+      d.setUint32(16,b.seed,true); d.setUint32(20,N,true); d.setUint32(24,b.event,true); d.setUint32(28,b.R,true);
+      device.queue.writeBuffer(buf.brush,0,d.buffer);
+    }
+    const enc=device.createCommandEncoder();
+    if(n>0) enc.clearBuffer(buf.stats);
+    const cp=enc.beginComputePass();
+    const wgE=Math.ceil(NN/256);
+    const run=(p,g,x)=>{ cp.setPipeline(p); cp.setBindGroup(0,g); cp.dispatchWorkgroups(x); };
+    if(b){ run(P.br,bgs.br,wgE); run(fftF,bgs.f1,N); run(fftF,bgs.f2,N); run(P.inj,bgs.inj,wgE); }
+    if(view.vac){ run(P.vac,bgs.vac,wgE); run(fftF,bgs.f1,N); run(fftF,bgs.f2,N); run(P.inj,bgs.inj,wgE); }
+    for(let s=0;s<n;s++){
+      run(fftI,bgs.i1,N); run(fftI,bgs.i2,N);   // psi = F^-1 psiHat
+      run(P.nl,bgs.nl,wgE);                     // g = psi^3 - C psi
+      run(fftF,bgs.f1,N); run(fftF,bgs.f2,N);   // F g
+      run(P.up,bgs.up,wgE);                     // psiHat = E psiHat + Phi F g
+    }
+    if(n>0) run(P.sk,bgs.sk,wgE);
+    cp.end();
+    const rp=enc.beginRenderPass({colorAttachments:[{view:ctx.getCurrentTexture().createView(),
+      loadOp:'clear',storeOp:'store',clearValue:{r:0,g:0,b:0,a:1}}]});
+    rp.setPipeline(P.render); rp.setBindGroup(0,bgs.r); rp.draw(3); rp.end();
+    let rb=null;
+    if(n>0){ rb=ring.find(r=>!r.busy); if(rb){ enc.copyBufferToBuffer(buf.stats,0,rb.buf,0,8); rb.busy=true; } }
+    device.queue.submit([enc.finish()]);
+    if(rb){
+      const g=B.gen;
+      rb.buf.mapAsync(GPUMapMode.READ).then(()=>{
+        const vv=new Float32Array(rb.buf.getMappedRange(0,8).slice(0));
+        rb.buf.unmap(); rb.busy=false;
+        if(B.onStats) B.onStats(vv[0],g,vv[1]);
+      },()=>{ rb.busy=false; });
+    }
+    return n;
+  };
+  let skBusy=false;
+  B.readSK=()=>{
+    if(skBusy) return null;
+    skBusy=true;
+    const enc=device.createCommandEncoder(), dst=buf.skr;
+    enc.copyBufferToBuffer(buf.sk,0,dst,0,NN*4);
+    device.queue.submit([enc.finish()]);
+    return dst.mapAsync(GPUMapMode.READ).then(()=>{
+      const a=new Float32Array(dst.getMappedRange().slice(0)); dst.unmap(); skBusy=false; return a;
+    },()=>{ skBusy=false; return null; });
+  };
+  B.destroy=()=>{ B.dead=true; try{ device.destroy(); }catch(e){} };
+  device.lost.then(info=>{
+    if(B.dead || info.reason==='destroyed') return;
+    note('The GPU device was lost, so the simulation moved to the CPU.');
+    S.engine='cpu32'; $('#engine').value='cpu32'; start();
+  });
+  return B;
+}
+
+/* ---------- controller ---------- */
+let vacEvent=0, pendingVac=null, logMax=null, skReset=true, brushEvent=0, backend=null, gen=0, simT=0, lastM=1, Clevel=null, Ccur=1, lastLower=0, needOne=true;
+const pointer={down:false,cx:0,cy:0};
+
+function note(msg){ $('#note').textContent=msg||''; }
+function rebuildCoefs(){ if(backend) backend.setCoefs(buildCoefs(S.N,DX,S.r,Ccur,S.dt,S.fd,backend.coefType),Ccur); }
+function Cneed(m){ const rr=Math.max(0,-S.r); return Math.max(0.3, rr+0.1, 1.6*m+rr+0.05); }
+function updateC(m,force){
+  const L=Math.ceil(Math.log(Cneed(m))/Math.log(1.2)), now=performance.now();
+  const lower = Clevel!==null && L<Clevel-1 && now-lastLower>500;
+  if(force || Clevel===null || L>Clevel || lower){
+    if(lower) lastLower=now;
+    Clevel=L; Ccur=Math.pow(1.2,L); rebuildCoefs();
+  }
+}
+function onStats(m,g,smax){
+  if(g!==gen) return;
+  if(smax>0 && Number.isFinite(smax)){ const t=Math.log10(smax); logMax = logMax==null ? t : logMax+0.3*(t-logMax); }
+  if(!Number.isFinite(m) || m>1e4){ note('The field diverged, so it was quenched again.'); quench(); return; }
+  lastM=m;
+  if(!pointer.down) updateC(m);
+}
+function resetRun(spec,m){
+  prof=null;
+  gen++; backend.gen=gen; simT=0; brushEvent=0; vacEvent=0; pendingVac=null; skReset=true; logMax=null;
+  backend.setState(spec);
+  lastM=m; updateC(lastM,true);
+  needOne=true;
+}
+function quench(){ resetRun(quenchSpectrum(S.N,S.psibar,S.A,S.seed),(Math.abs(S.psibar)+S.A)**2); }
+function seedCrystal(theta){ const c=crystalSpectrum(S.N,S.r,S.psibar,S.fd,theta); resetRun(c.spec,c.m); }
+function freshCanvas(){
+  const old=$('#cv'), c=document.createElement('canvas');
+  c.id='cv'; c.setAttribute('aria-label','Density field ψ');
+  old.replaceWith(c); return c;
+}
+function syncGridOptions(){
+  const cpu=backend && backend.name.startsWith('CPU');
+  for(const o of $('#grid').options) o.disabled = cpu && +o.value>256;
+  $('#grid').value=String(S.N);
+}
+let starting=false;
+async function start(){
+  if(starting) return; starting=true;
+  if(backend){ backend.destroy(); backend=null; }
+  let be=null;
+  if(S.engine==='gpu32'){
+    let why='';
+    try{ const c=freshCanvas(); be=await makeGPU(c); if(be) await be.init(S.N); }
+    catch(e){ console.warn(e); why=String(e && e.message || e); if(be) be.destroy(); be=null; }
+    if(!be) note(why ? 'WebGPU failed, so the simulation runs on the CPU. Error: '+why.slice(0,400)
+                     : 'WebGPU isn’t available in this browser, so the simulation runs on the CPU.');
+  }
+  if(!be){
+    if(S.N>256) S.N = S.engine==='gpu32' ? 128 : 256;
+    const c=freshCanvas(); be=makeCPU(c,S.engine==='cpu64'); await be.init(S.N);
+  }
+  backend=be; backend.onStats=onStats; Clevel=null;
+  syncGridOptions(); quench();
+  $('#o-e').textContent=`${backend.name}, ${S.N}²`;
+  starting=false;
+}
+
+/* ---------- loop ---------- */
+let spsWin=0, spsT=performance.now(), sps=0, lastUI=0;
+function loop(now){
+  requestAnimationFrame(loop);
+  if(!backend || starting) return;
+  let n = S.paused ? (needOne?1:0) : S.spf;
+  let b=null;
+  if(pointer.down){
+    if(n===0) n=1;
+    b={cx:pointer.cx, cy:pointer.cy, rad:BRUSH_R, R:Math.ceil(3*BRUSH_R), amp:S.brushAmp, seed:S.seed, event:brushEvent++};
+    updateC(Math.max(lastM,(Math.abs(S.psibar)+0.9+S.brushAmp)**2));
+  }
+  needOne=false;
+  let vac=null;
+  if(pendingVac){ vac=pendingVac; pendingVac=null; if(n===0) n=1; }
+  const W=Math.min(S.N/2-1,Math.round(S.kmax*S.N*DX/(2*Math.PI)));
+  const view={lo:S.psibar-S.range, hi:S.psibar+S.range, mode:S.fourier?1:0, W,
+    logMax:logMax==null?-2:logMax, decades:S.decades, q0px:q0For(S.fd)*S.N*DX/(2*Math.PI), rings:S.rings,
+    alpha:skReset?1:S.kavg, vac};
+  const done=backend.frame(n,b,view);
+  if(done>0) skReset=false;
+  simT+=done*S.dt; spsWin+=done;
+  if(now-spsT>500){ sps=spsWin*1000/(now-spsT); spsWin=0; spsT=now; }
+  if(now-lastUI>250){
+    lastUI=now;
+    $('#o-t').textContent=simT.toFixed(0);
+    $('#o-sps').textContent=sps.toFixed(0);
+    $('#o-c').textContent=Ccur.toFixed(2);
+    $('#o-m').textContent=Math.sqrt(lastM).toFixed(2);
+    $('#o-e').textContent=`${backend.name}, ${S.N}²`;
+  }
+  requestProfiles(now);
+}
+
+/* ---------- radial and azimuthal profiles ---------- */
+function computeProfiles(sk,N,q0px){
+  const half=N>>1, rs=new Float64Array(half+1), rc=new Float64Array(half+1);
+  for(let n=0;n<N;n++){ const ky=n<=half?n:n-N;
+    for(let m=0;m<N;m++){ const i=n*N+m; if(!i) continue; const kx=m<=half?m:m-N, b=Math.round(Math.hypot(kx,ky)); if(b<=half){ rs[b]+=sk[i]; rc[b]++; } } }
+  const rad=[]; for(let b=1;b<=half;b++) rad.push(rc[b]?rs[b]/rc[b]:0);
+  let pk=0, pv=-1; for(let b=Math.max(1,Math.floor(0.6*q0px)); b<=Math.min(half,Math.ceil(1.4*q0px)); b++){ if(rad[b-1]>pv){ pv=rad[b-1]; pk=b; } }
+  let fw=null;
+  if(pv>0){ const hm=pv/2; let lo=pk, hi=pk;
+    while(lo>1 && rad[lo-2]>hm) lo--; while(hi<half && rad[hi]>hm) hi++;
+    const fl = lo>1 ? lo-1+(hm-rad[lo-2])/(rad[lo-1]-rad[lo-2]) : lo;
+    const fh = hi<half ? hi+(rad[hi-1]-hm)/(rad[hi-1]-rad[hi]) : hi;
+    fw=fh-fl; }
+  const NB=120, as=new Float64Array(NB), ac=new Float64Array(NB), r0=pk||q0px, w=Math.max(1.5,0.05*r0);
+  for(let n=0;n<N;n++){ const ky=n<=half?n:n-N;
+    for(let m=0;m<N;m++){ const kx=m<=half?m:m-N, rr=Math.hypot(kx,ky); if(Math.abs(rr-r0)>w||!(n*N+m)) continue;
+      let th=Math.atan2(-ky,kx)*180/Math.PI; if(th<0) th+=360; const b=Math.min(NB-1,Math.floor(th/3)); as[b]+=sk[n*N+m]; ac[b]++; } }
+  const az=[]; for(let b=0;b<NB;b++) az.push(ac[b]?as[b]/ac[b]:0);
+  const amax=Math.max(...az), amin=Math.min(...az.filter(v=>v>0)), above=az.map(v=>v>amax/2);
+  let spots=0, widths=0, start=above.indexOf(false);
+  if(start<0){ spots=0; } else {
+    let run=0;
+    for(let j=1;j<=NB;j++){ const b=(start+j)%NB; if(above[b]) run++; else if(run){ spots++; widths+=run*3; run=0; } }
+  }
+  return {rad, pk, pv, fw, az, spots, meanW: spots?widths/spots:0, contrast: amin>0?amax/amin:Infinity};
+}
+function drawLogPlot(cv,xs,ys,o){
+  const dpr=window.devicePixelRatio||1, W=cv.clientWidth, H=cv.clientHeight;
+  if(!W||!H) return;
+  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){ cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); }
+  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
+  const cs=getComputedStyle(document.documentElement), ink=cs.getPropertyValue('--ink').trim(),
+        muted=cs.getPropertyValue('--muted').trim(), line=cs.getPropertyValue('--line').trim(), acc=cs.getPropertyValue('--accent').trim();
+  g.font='11px "Instrument Sans", system-ui, sans-serif';
+  const L=44, R=10, T=8, B=22, pw=W-L-R, ph=H-T-B;
+  g.strokeStyle=line; g.lineWidth=1; g.strokeRect(L+0.5,T+0.5,pw,ph);
+  const pts=[]; for(let i=0;i<xs.length;i++) if(xs[i]>=o.xmin && xs[i]<=o.xmax && ys[i]>0) pts.push([xs[i],Math.log10(ys[i])]);
+  if(pts.length<2){ g.fillStyle=muted; g.fillText('Collecting data…',L+8,T+18); return; }
+  let y1=Math.ceil(Math.max(...pts.map(p=>p[1]))), y0=Math.max(y1-o.decades, Math.floor(Math.min(...pts.map(p=>p[1]))));
+  if(y1<=y0) y1=y0+1;
+  const X=x=>L+(x-o.xmin)/(o.xmax-o.xmin)*pw, Y=y=>T+(1-(Math.max(y,y0)-y0)/(y1-y0))*ph;
+  const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+  g.fillStyle=muted; g.textAlign='right'; g.textBaseline='middle';
+  const ystep=Math.max(1,Math.ceil((y1-y0)/4));
+  for(let e=y1;e>=y0;e-=ystep){ const y=Y(e); g.strokeStyle=line; g.beginPath(); g.moveTo(L,y+0.5); g.lineTo(L+pw,y+0.5); g.stroke();
+    g.fillText('10'+String(e).split('').map(c=>SUP[c]).join(''),L-5,y); }
+  g.textAlign='center'; g.textBaseline='top';
+  for(const t of o.xticks){ g.fillText(o.xfmt(t),X(t),T+ph+5); }
+  g.setLineDash([3,3]); g.strokeStyle=muted;
+  for(const v of (o.vlines||[])){ if(v<o.xmin||v>o.xmax) continue; g.beginPath(); g.moveTo(X(v)+0.5,T); g.lineTo(X(v)+0.5,T+ph); g.stroke(); }
+  g.setLineDash([]);
+  g.strokeStyle=acc; g.lineWidth=1.5; g.beginPath();
+  pts.forEach((p,i)=>{ const x=X(p[0]), y=Y(p[1]); if(i) g.lineTo(x,y); else g.moveTo(x,y); }); g.stroke();
+  g.fillStyle=ink; g.textAlign='left'; g.textBaseline='top'; g.fillText(o.xlabel,L+6,T+4);
+}
+let prof=null, profBusy=false, lastProf=0;
+function requestProfiles(now){
+  if(profBusy || now-lastProf<500 || !backend.readSK) return;
+  const p=backend.readSK(); if(!p) return;
+  profBusy=true; lastProf=now; const g=gen, N=S.N;
+  p.then(sk=>{ profBusy=false; if(!sk||g!==gen||N!==S.N) return; prof=computeProfiles(sk,N,q0For(S.fd)*N*DX/(2*Math.PI)); drawProfiles(); },
+         ()=>{ profBusy=false; });
+}
+function drawProfiles(){
+  if(!prof) return;
+  const N=S.N, dk=2*Math.PI/(N*DX), q0=q0For(S.fd), kmax=Math.min(S.kmax, Math.PI/DX);
+  const ks=prof.rad.map((_,i)=>(i+1)*dk);
+  const step=kmax>2.5?1:0.5, ticks=[]; for(let t=0;t<=kmax+1e-9;t+=step) ticks.push(t);
+  drawLogPlot($('#radplot'),ks,prof.rad,{xmin:0,xmax:kmax,decades:S.decades,xticks:ticks,xfmt:t=>String(t),vlines:[q0,Math.sqrt(3)*q0,2*q0],xlabel:'|k| →'});
+  $('#rad-meta').textContent = prof.pk ? `peak k = ${(prof.pk*dk).toFixed(3)}, width ${prof.fw!=null?(prof.fw*dk).toFixed(3):'–'}` : '';
+  drawLogPlot($('#azplot'),prof.az.map((_,i)=>i*3+1.5),prof.az,{xmin:0,xmax:360,decades:Math.min(S.decades,4),xticks:[0,60,120,180,240,300,360],xfmt:t=>t+'°',xlabel:'θ →'});
+  $('#az-meta').textContent = prof.contrast<3 ? 'no distinct spots (ring)'
+    : `${prof.spots} spot${prof.spots===1?'':'s'}, mean width ${prof.meanW.toFixed(0)}°`;
+}
+window.addEventListener('resize',drawProfiles);
+
+/* ---------- UI ---------- */
+function bindRange(id,key,fmt,onchange){
+  const el=$('#'+id), out=$('#v-'+id);
+  const upd=()=>{ S[key]=parseFloat(el.value); out.textContent=fmt(S[key]); };
+  el.addEventListener('input',()=>{ upd(); if(onchange && backend && !starting) onchange(); });
+  upd();
+}
+const f2=v=>v.toFixed(2);
+bindRange('r','r',f2,()=>updateC(lastM,true));
+bindRange('pb','psibar',f2,()=>backend.setPsibar(S.psibar));
+bindRange('amp','A',f2);
+bindRange('heat','brushAmp',f2);
+bindRange('dt','dt',f2,rebuildCoefs);
+bindRange('spf','spf',v=>String(v|0));
+bindRange('range','range',v=>'± '+v.toFixed(2));
+document.querySelectorAll('input[name=op]').forEach(el=>el.addEventListener('change',()=>{
+  S.fd = document.querySelector('input[name=op]:checked').value==='fd'; rebuildCoefs();
+}));
+$('#grid').addEventListener('change',async e=>{
+  if(!backend || starting) return;
+  S.N=+e.target.value; starting=true;
+  try{ await backend.init(S.N); } catch(err){ console.warn(err); starting=false; S.engine='cpu32'; $('#engine').value='cpu32'; return start(); }
+  starting=false; Clevel=null; resetCurrent();
+});
+$('#engine').addEventListener('change',e=>{ S.engine=e.target.value; note(''); start().then(()=>resetCurrent()); });
+Object.assign(S,{fourier:false,kmax:2,kavg:0.2,decades:6,rings:true,theta:12,vacFrac:3});
+document.querySelectorAll('input[name=view]').forEach(el=>el.addEventListener('change',()=>{
+  S.fourier = document.querySelector('input[name=view]:checked').value==='fourier';
+  $('#cv').setAttribute('aria-label', S.fourier ? 'Structure factor of ψ on a log scale' : 'Density field ψ');
+}));
+$('#kzoom').addEventListener('change',e=>{ S.kmax=+e.target.value; });
+$('#kavg').addEventListener('change',e=>{ S.kavg=+e.target.value; });
+$('#rings').addEventListener('change',e=>{ S.rings=e.target.checked; });
+bindRange('dec','decades',v=>v.toFixed(1));
+bindRange('theta','theta',v=>(v|0)+'°');
+bindRange('vac','vacFrac',v=>v.toFixed(1)+'%');
+$('#b-xtal').addEventListener('click',()=>{ if(backend && !starting){ note(''); seedCrystal(null); } });
+$('#b-bix').addEventListener('click',()=>{ if(backend && !starting){ note(''); seedCrystal(S.theta); } });
+$('#b-vac').addEventListener('click',()=>{ if(backend && !starting){
+  pendingVac={conc:S.vacFrac/100, pb:S.psibar, seed:S.seed, event:vacEvent++};
+} });
+function readSeed(){
+  const v=Math.floor(Number($('#seed').value));
+  S.seed = Number.isFinite(v) ? ((v%4294967296)+4294967296)%4294967296 : 0;
+  $('#seed').value=String(S.seed);
+}
+$('#b-quench').addEventListener('click',()=>{ if(backend && !starting){ note(''); readSeed(); resetCurrent(); } });
+$('#b-seed').addEventListener('click',()=>{ $('#seed').value=String((Math.random()*4294967296)>>>0); if(backend && !starting){ note(''); readSeed(); resetCurrent(); } });
+$('#seed').addEventListener('change',()=>{ readSeed(); if(backend && !starting){ note(''); resetCurrent(); } });
+$('#b-pause').addEventListener('click',e=>{ S.paused=!S.paused; e.target.textContent=S.paused?'Resume':'Pause'; });
+
+const field=$('#field');
+function setPos(e){
+  const r=$('#cv').getBoundingClientRect();
+  const cl=v=>Math.min(Math.max(v,0),S.N-1e-3);
+  pointer.cx=cl((e.clientX-r.left)/r.width*S.N); pointer.cy=cl((e.clientY-r.top)/r.height*S.N);
+}
+field.addEventListener('pointerdown',e=>{ pointer.down=true; field.setPointerCapture(e.pointerId); setPos(e); });
+field.addEventListener('pointermove',e=>{ if(pointer.down) setPos(e); });
+['pointerup','pointercancel','lostpointercapture'].forEach(t=>field.addEventListener(t,()=>{ pointer.down=false; }));
+
+/* ---------- gallery ---------- */
+function specFromField(f,N){
+  const NN=N*N, re=Float64Array.from(f), im=new Float64Array(NN); getFFT(N).f2(re,im,1);
+  const out=new Float64Array(2*NN); let mean=0, m=0;
+  for(let i=0;i<NN;i++){ out[2*i]=re[i]/NN; out[2*i+1]=im[i]/NN; mean+=f[i]; if(f[i]*f[i]>m) m=f[i]*f[i]; }
+  out[1]=0; return {spec:out, mean:mean/NN, m};
+}
+function setSlider(id,key,val,fmt){ S[key]=val; $('#'+id).value=String(val); $('#v-'+id).textContent=fmt(val); }
+let activePreset=null;
+function resetCurrent(){ if(activePreset) loadPreset(activePreset,true); else quench(); }
+function showParam(P){
+  const box=$('#look-ctl'), inp=$('#look-param');
+  if(!P.param){ box.hidden=true; return; }
+  const q=P.param; box.hidden=false; $('#look-plabel').textContent=q.label;
+  inp.min=q.min; inp.max=q.max; inp.step=q.step; inp.value=P[q.key]; $('#look-pval').textContent=P[q.key]+q.unit;
+}
+$('#look-param').addEventListener('input',e=>{ const P=activePreset; if(!P||!P.param) return; P[P.param.key]=+e.target.value; $('#look-pval').textContent=e.target.value+P.param.unit; });
+$('#look-param').addEventListener('change',()=>{ const P=activePreset; if(!P||!P.param) return; loadPreset(P,true); drawThumb(P); });
+function loadPreset(P,quiet=false){
+  if(!backend || starting) return;
+  note('');
+  const f=P.gen(S.N), {spec,mean,m}=specFromField(f,S.N);
+  setSlider('r','r',P.r,v=>v.toFixed(2));
+  setSlider('pb','psibar',+mean.toFixed(2),v=>v.toFixed(2)); S.psibar=mean;
+  setSlider('range','range',P.range,v=>v.toFixed(2));
+  resetRun(spec,m);
+  activePreset=P;
+  if(P._card) P._card.st.textContent=P.sub||'';
+  for(const c of document.querySelectorAll('.card')) c.setAttribute('aria-pressed', String(c.dataset.id===P.id));
+  $('#look-title').textContent=P.title+(P.sub?' · '+P.sub:'');
+  $('#look-text').textContent=P.look;
+  $('#look-params').textContent=`r = ${P.r.toFixed(2)}, ψ̄ = ${mean.toFixed(3)}, grid ${S.N}²`;
+  showParam(P);
+  if(!quiet && window.innerWidth<880) $('#field').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function drawThumb(P){  // thumbnails are generated at 128²; keep the active preset's subtitle for the simulation grid
+  const keep=P.sub, n=128, f=P.gen(n); let mean=0; for(const v of f) mean+=v; mean/=n*n;
+  if(P===activePreset) P.sub=keep;
+  P._card.st.textContent=P.sub||'';
+  const g=P._card.cv.getContext('2d'), img=g.createImageData(n,n), px=new Uint32Array(img.data.buffer), sc=255/(2*P.range);
+  for(let i=0;i<n*n;i++){ let t=((f[i]-mean+P.range)*sc+0.5)|0; t=t<0?0:t>255?255:t; px[i]=LUT32[t]; }
+  g.putImageData(img,0,0);
+}
+function buildGallery(){
+  const root=$('#cards'); let group=null, grid=null;
+  for(const P of PRESETS){
+    if(P.group!==group){ group=P.group; const h=document.createElement('h3'); h.textContent=group; root.appendChild(h);
+      grid=document.createElement('div'); grid.className='cards'; root.appendChild(grid); }
+    const b=document.createElement('button'); b.type='button'; b.className='card'; b.dataset.id=P.id; b.setAttribute('aria-pressed','false');
+    const cv=document.createElement('canvas'); cv.width=128; cv.height=128; cv.setAttribute('aria-hidden','true');
+    const t=document.createElement('span'); t.className='ct'; t.textContent=P.title;
+    const st=document.createElement('span'); st.className='cs'; st.textContent=P.sub||'';
+    b.append(cv,t,st); b.addEventListener('click',()=>loadPreset(P)); grid.appendChild(b);
+    P._card={cv,st};
+  }
+  let k=0;
+  const thumb=()=>{  // one thumbnail per tick so the page stays responsive
+    if(k>=PRESETS.length) return;
+    drawThumb(PRESETS[k++]); setTimeout(thumb,0);
+  };
+  setTimeout(thumb,0);
+}
+buildGallery();
+start().then(()=>{ loadPreset(PRESETS.find(p=>p.id==='gb5'),true); requestAnimationFrame(loop); });
+</script>
+<script src="../../shared/record.js" data-canvas="cv"></script>
+</body>
+</html>

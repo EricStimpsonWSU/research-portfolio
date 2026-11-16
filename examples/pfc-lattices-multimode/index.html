@@ -1,0 +1,1240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Multi-mode PFC: lattices from chosen wavenumbers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#EEF1F4; --surface:#FFFFFF; --ink:#1B2733; --muted:#5B6B7A;
+  --line:#C9D2DB; --accent:#2E6F95; --accent-ink:#FFFFFF; --warn:#A63D2A;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141B22; --surface:#1C252E; --ink:#E4EAF0; --muted:#8FA0B0;
+    --line:#2C3946; --accent:#6FB3D9; --accent-ink:#0F1A22; --warn:#E08A72;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141B22; --surface:#1C252E; --ink:#E4EAF0; --muted:#8FA0B0;
+  --line:#2C3946; --accent:#6FB3D9; --accent-ink:#0F1A22; --warn:#E08A72;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 36px;
+  display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
+@media (max-width:880px){main{grid-template-columns:minmax(0,1fr);gap:20px}}
+h1{font-size:1.6rem;line-height:1.15;font-weight:600;margin:0 0 4px;letter-spacing:-0.01em}
+.lede{margin:0 0 14px;color:var(--muted);max-width:62ch}
+.field{position:relative;width:100%;max-width:calc(100svh - 170px);min-width:260px;
+  touch-action:none;cursor:crosshair;border-radius:6px;overflow:hidden;background:#0E1A3A}
+@media (max-width:880px){.field{max-width:none}}
+.field canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;image-rendering:auto}
+.readout{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px 16px;margin:12px 0 0;
+  max-width:calc(100svh - 170px)}
+@media (max-width:880px){.readout{max-width:none;grid-template-columns:repeat(3,minmax(0,1fr))}}
+.readout div{min-width:0}
+.readout dt{font-size:12px;color:var(--muted)}
+.readout dd{margin:0;font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note{margin:10px 0 0;font-size:13px;color:var(--warn);min-height:1em;max-width:62ch}
+.controls{display:flex;flex-direction:column;gap:14px}
+.actions{display:flex;gap:8px}
+button{font:inherit;font-weight:500;padding:9px 14px;border-radius:6px;cursor:pointer;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);flex:1}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+fieldset{border:1px solid var(--line);border-radius:6px;margin:0;padding:8px 12px 12px;background:var(--surface)}
+legend{font-size:13px;font-weight:600;color:var(--muted);padding:0 4px}
+.ctl{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:0 8px;margin-top:8px}
+.ctl span{font-size:14px}
+.ctl output{font-size:14px;font-weight:500}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+.plotwrap{margin-top:14px;max-width:calc(100svh - 170px)}
+@media (max-width:880px){.plotwrap{max-width:none}}
+.plothead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin:12px 0 6px}
+.plothead h2{font-size:14px;font-weight:600;margin:0}
+.pmeta{font-size:13px;color:var(--muted)}
+canvas.plot{display:block;width:100%;height:150px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.ctl input[type=range]{grid-column:1/-1;width:100%;margin:4px 0 0;accent-color:var(--accent)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;font-size:14px}
+select{font:inherit;font-size:14px;padding:4px 6px;border-radius:5px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.radios{display:flex;flex-direction:column;gap:4px;margin-top:10px;font-size:14px}
+.radios label{display:flex;gap:6px;align-items:center}
+.radios input{accent-color:var(--accent);margin:0}
+.seedbox{display:flex;gap:6px;align-items:center}
+.seedbox input{width:8.5em;font:inherit;font-size:14px;padding:4px 6px;border-radius:5px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.seedbox button{padding:4px 10px;font-size:14px}
+details{font-size:14px;color:var(--ink)}
+summary{cursor:pointer;font-weight:500}
+details p{margin:8px 0 0;color:var(--muted);line-height:1.55}
+.eq{color:var(--ink)}
+.latt{grid-column:1/-1}
+.latt .lede{margin-bottom:10px}
+.lattgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 300px;gap:16px;align-items:start}
+@media (max-width:1000px){.lattgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.lattgrid .lattctl{grid-column:1/-1}}
+@media (max-width:560px){.lattgrid{grid-template-columns:minmax(0,1fr)}}
+.lattfig{margin:0}
+.lattfig canvas{display:block;width:100%;aspect-ratio:1/1;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.lattfig figcaption{font-size:13px;color:var(--muted);margin-top:6px}
+.modes{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px 8px;align-items:center;margin-top:8px;font-size:14px}
+.modes input[type=number]{width:100%;font:inherit;font-size:14px;padding:3px 6px;border-radius:5px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.modes .mh{font-size:12px;color:var(--muted)}
+.simh{font-size:1.25rem;font-weight:600;margin:0 0 10px}
+</style>
+</head>
+<body>
+<main>
+  <section class="latt" aria-labelledby="latt-h">
+    <h1 id="latt-h">Multi-mode PFC: lattices from chosen wavenumbers</h1>
+    <p class="lede">Pick a target lattice and the wavenumbers Qᵢ the model favours. The left panel shows the lattice sites with dashed lattice vectors; the right panel shows which reciprocal-lattice points land on the favoured rings. The simulation below runs the same model.</p>
+    <div class="lattgrid">
+      <figure class="lattfig"><canvas id="realcv" aria-label="Target lattice sites in real space with dashed lattice vectors"></canvas>
+        <figcaption id="real-cap"></figcaption></figure>
+      <figure class="lattfig"><canvas id="recipcv" aria-label="Reciprocal lattice points and favoured wavenumber rings"></canvas>
+        <figcaption id="recip-cap"></figcaption></figure>
+      <div class="lattctl">
+        <fieldset>
+          <legend>Target lattice</legend>
+          <div class="row"><label for="lattice">Lattice</label>
+            <select id="lattice">
+              <option value="square">Square</option>
+              <option value="tri">Triangular</option>
+              <option value="honey">Honeycomb</option>
+              <option value="stripe">Stripes</option>
+              <option value="rect">Rectangular (exploratory)</option>
+            </select></div>
+          <label class="ctl"><span>Aspect ratio a₂/a₁</span><output id="v-rho"></output>
+            <input type="range" id="rho" min="1.1" max="2.5" step="0.05" value="1.5"></label>
+          <div class="row"><label for="nmodes">Modes</label>
+            <select id="nmodes"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
+          <div class="modes" id="modes"></div>
+          <div class="actions" style="margin-top:10px;flex-wrap:wrap">
+            <button type="button" id="b-fit">Fit Qᵢ to lattice</button>
+            <button type="button" id="b-preset" class="primary">Load preset</button>
+          </div>
+          <p class="hint" id="preset-hint"></p>
+        </fieldset>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="simh">Simulation</h2>
+    <div class="field" id="field"><canvas id="cv" width="256" height="256" aria-label="Density field ψ"></canvas></div>
+    <dl class="readout">
+      <div><dt>Time</dt><dd id="o-t">0</dd></div>
+      <div><dt>Steps per second</dt><dd id="o-sps">0</dd></div>
+      <div><dt>Stabilizer C</dt><dd id="o-c">0</dd></div>
+      <div><dt>Max |ψ|</dt><dd id="o-m">0</dd></div>
+      <div><dt>Engine</dt><dd id="o-e">Starting</dd></div>
+    </dl>
+    <p class="note" id="note" role="status"></p>
+    <div class="plotwrap">
+      <div class="plothead"><h2>Radial profile S(|k|)</h2><span class="pmeta" id="rad-meta"></span></div>
+      <canvas id="radplot" class="plot" aria-label="Radially averaged structure factor, log scale"></canvas>
+      <div class="plothead"><h2>Azimuthal profile S(θ) on the strongest ring</h2><span class="pmeta" id="az-meta"></span></div>
+      <canvas id="azplot" class="plot" aria-label="Structure factor around the first ring against angle, log scale"></canvas>
+    </div>
+  </section>
+
+  <aside class="controls">
+    <div class="actions">
+      <button class="primary" id="b-quench">Quench again</button>
+      <button id="b-pause">Pause</button>
+    </div>
+
+    <fieldset>
+      <legend>Model</legend>
+      <label class="ctl"><span>Undercooling r</span><output id="v-r"></output>
+        <input type="range" id="r" min="-1.2" max="-0.02" step="0.01" value="-0.5"></label>
+      <label class="ctl"><span>Mean density ψ̄</span><output id="v-pb"></output>
+        <input type="range" id="pb" min="-0.8" max="0.6" step="0.01" value="-0.45"></label>
+      <label class="ctl"><span>Mode strength λ</span><output id="v-lam"></output>
+        <input type="range" id="lam" min="0.1" max="4" step="0.05" value="1"></label>
+      <label class="ctl"><span>Cubic g</span><output id="v-gc"></output>
+        <input type="range" id="gc" min="-1" max="1" step="0.05" value="0"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Quench</legend>
+      <label class="ctl"><span>Noise amplitude</span><output id="v-amp"></output>
+        <input type="range" id="amp" min="0.1" max="2" step="0.05" value="1"></label>
+      <label class="ctl"><span>Reheat strength</span><output id="v-heat"></output>
+        <input type="range" id="heat" min="0.1" max="1.5" step="0.05" value="0.8"></label>
+      <div class="row"><label for="seed">Seed</label>
+        <span class="seedbox"><input type="number" id="seed" min="0" max="4294967295" step="1" inputmode="numeric" value="12345"><button id="b-seed" type="button">New seed</button></span></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Integrator</legend>
+      <label class="ctl"><span>Time step Δt</span><output id="v-dt"></output>
+        <input type="range" id="dt" min="0.05" max="3" step="0.05" value="0.5"></label>
+      <label class="ctl"><span>Steps per frame</span><output id="v-spf"></output>
+        <input type="range" id="spf" min="1" max="60" step="1" value="8"></label>
+
+      <div class="row"><label for="grid">Grid</label>
+        <select id="grid">
+          <option value="128">128 × 128</option>
+          <option value="256" selected>256 × 256</option>
+          <option value="512">512 × 512</option>
+          <option value="1024">1024 × 1024</option>
+        </select></div>
+      <div class="row"><label for="engine">Engine</label>
+        <select id="engine">
+          <option value="gpu32" selected>GPU f32 (WebGPU)</option>
+          <option value="cpu32">CPU f32</option>
+          <option value="cpu64">CPU f64</option>
+        </select></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>View</legend>
+      <div class="radios" role="radiogroup" aria-label="View">
+        <label><input type="radio" name="view" value="real" checked> Density ψ(r)</label>
+        <label><input type="radio" name="view" value="fourier"> Structure factor |ψ̂(k)|², log scale</label>
+      </div>
+      <label class="ctl"><span>Color range around ψ̄</span><output id="v-range"></output>
+        <input type="range" id="range" min="0.2" max="1.5" step="0.05" value="0.7"></label>
+      <div class="row"><label for="kzoom">k range</label>
+        <select id="kzoom">
+          <option value="1.4">|k| ≤ 1.4</option>
+          <option value="2">|k| ≤ 2</option>
+          <option value="2.5" selected>|k| ≤ 2.5</option>
+          <option value="4">Whole spectrum</option>
+        </select></div>
+      <div class="row"><label for="kavg">Averaging</label>
+        <select id="kavg">
+          <option value="1">None</option>
+          <option value="0.2" selected>Short</option>
+          <option value="0.03">Long</option>
+        </select></div>
+      <label class="ctl"><span>Dynamic range (decades)</span><output id="v-dec"></output>
+        <input type="range" id="dec" min="2" max="10" step="0.5" value="6"></label>
+      <label class="check"><input type="checkbox" id="rings" checked> Rings at the favoured Qᵢ</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Defects</legend>
+      <div class="actions" style="flex-wrap:wrap">
+        <button id="b-xtal" type="button">Seed target lattice</button>
+      </div>
+      <div class="actions" style="margin-top:10px"><button id="b-vac" type="button">Punch vacancies</button></div>
+      <label class="ctl"><span>Vacancy fraction</span><output id="v-vac"></output>
+        <input type="range" id="vac" min="0.5" max="10" step="0.5" value="3"></label>
+      <p class="hint">Seeding replaces the field with the target lattice, using every reciprocal point that lands on a favoured ring, fitted to the periodic box. Quench again instead to see which lattice the model picks on its own. Punching removes randomly chosen atoms; the removed mass spreads evenly, so the mean stays put.</p>
+    </fieldset>
+
+    <details>
+      <summary>How it steps</summary>
+      <p><span class="eq">F = ∫ ψ(r + λ ∏ᵢ[(Qᵢ² + ∇²)² + bᵢ])ψ/2 − gψ³/3 + ψ⁴/4</span>, conserved dynamics ∂ψ/∂t = ∇² δF/δψ, grid spacing π/4, periodic (the multi-mode model of Mkhonta, Elder and Huang). The product has a zero at each Qᵢ; the weight bᵢ lifts that minimum, so a larger bᵢ favours mode i less.</p>
+      <p>A lattice is stabilized when its reciprocal points sit on several favoured rings at once and those points form closed triads (G₁ + G₂ + G₃ = 0), which the ψ³ and ψ⁴ terms reward. Square needs rings at 1 and √2; a triangular lattice can use only one ring of a square-tuned set, so square wins once both are favoured.</p>
+      <p>Each step is first-order exponential time differencing with the exact spectral symbol: E = e<sup>LΔt</sup>, Φ = −K²(e<sup>LΔt</sup>−1)/L, L = −K²(r + λ∏ᵢ[(Qᵢ²−K²)² + bᵢ] + C), computed in double precision. The product grows like K<sup>4n</sup>, which the exponential absorbs exactly. The cubic and quartic terms are explicit with stabilizer C.</p>
+      <p>Checked headless (128², relaxing seeded candidates and comparing free energy): with Q = (1, √2), r = −0.5, ψ̄ = −0.45, square beats triangular, stripes and uniform. With one mode at ψ̄ = −0.25 triangular wins, at ψ̄ = +0.25 honeycomb, at ψ̄ = 0 stripes. Rectangular did not win for any weights tried, so that preset is a starting point for exploring, not a recipe.</p>
+      <p>Structure factor view: |ψ̂(k)|² of the stored spectrum on a log scale, k = 0 omitted, optionally averaged over frames. A crystal gives six Bragg spots on the ring at q₀ and weaker ones at √3 q₀. Grains rotate the spot sets and smear them into arcs; many grains make a ring. Vacancies lower the spots and add a flat diffuse haze plus faint lobes beside each spot along its radial direction (Huang scattering from the strain around each vacancy). Long averaging and a wide dynamic range bring out the diffuse parts.</p>
+      <p>Profiles: S(|k|) averages the structure factor over rings one k-pixel wide; the peak position and full width at half maximum are read off it. S(θ) averages over the first ring (centred on the measured peak) in 3° bins; spots are runs above half the maximum, and their mean width measures mosaic spread or arc length. Both use the same frame averaging as the view and update twice a second.</p>
+      <p>The cubic term is explicit; C is the linear stabilizer moved between the two sides. It’s set from the measured max ψ² so the frozen-coefficient amplification stays below one. Steady states don’t depend on C.</p>
+      <p>Noise is Philox4x32-10 keyed by (seed, stream), with stream 0 for the quench and stream 1 for reheat strokes, counter (cell, stroke) and u = (word₀ ≫ 8)·2⁻²⁴. Vacancy selection uses stream 6 with counter (atom cell, punch). philox.py reproduces it exactly. The same seed and the same strokes give the same run.</p>
+      <p>GPU f32 is f32 throughout. CPU f32 stores in f32 but does arithmetic in double. CPU f64 is double throughout. WebGPU has no f64.</p>
+    </details>
+  </aside>
+</main>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const DX = Math.PI / 4;
+const S = { N:256, r:-0.5, psibar:-0.45, lam:1, g:0, lattice:'square', rho:1.5, nm:2, Q:[1,Math.SQRT2,2,Math.sqrt(5)], b:[0,0,0,0], A:1.0, brushAmp:0.8, dt:0.5, spf:8, range:0.7,
+            fd:false, paused:false, engine:'gpu32', seed:12345 };
+const BRUSH_R = 9 / DX; // cells
+
+/* ---------- Philox4x32-10 (Random123), matches philox.py ---------- */
+const PH_M0=0xD2511F53, PH_M1=0xCD9E8D57, PH_W0=0x9E3779B9, PH_W1=0xBB67AE85, TWO_M24=5.9604644775390625e-8;
+function mulhi32(a,b){
+  const a0=a&0xffff, a1=a>>>16, b0=b&0xffff, b1=b>>>16;
+  const p00=a0*b0, p01=a0*b1, p10=a1*b0, p11=a1*b1;
+  const mid=(p00>>>16)+(p01&0xffff)+(p10&0xffff);
+  return (p11+(p01>>>16)+(p10>>>16)+(mid>>>16))>>>0;
+}
+function philox4(c0,c1,c2,c3,k0,k1){
+  for(let r=0;r<10;r++){
+    if(r>0){ k0=(k0+PH_W0)>>>0; k1=(k1+PH_W1)>>>0; }
+    const lo0=Math.imul(PH_M0,c0)>>>0, hi0=mulhi32(PH_M0,c0);
+    const lo1=Math.imul(PH_M1,c2)>>>0, hi1=mulhi32(PH_M1,c2);
+    const n0=(hi1^c1^k0)>>>0, n2=(hi0^c3^k1)>>>0;
+    c0=n0; c1=lo1; c2=n2; c3=lo0;
+  }
+  return [c0,c1,c2,c3];
+}
+function noiseU(seed,stream,i,draw){ return (philox4(i>>>0,draw>>>0,0,0,seed>>>0,stream>>>0)[0]>>>8)*TWO_M24; }
+
+/* ---------- colormap ---------- */
+const STOPS = [[0,[14,26,58]],[0.3,[35,80,138]],[0.55,[78,156,192]],[0.8,[232,217,168]],[1,[255,247,230]]];
+const LUT = new Float32Array(256*4), LUT32 = new Uint32Array(256);
+for (let i=0;i<256;i++){
+  const t=i/255; let k=0; while(k<STOPS.length-2 && t>STOPS[k+1][0]) k++;
+  const [t0,c0]=STOPS[k], [t1,c1]=STOPS[k+1], u=(t-t0)/(t1-t0);
+  const c=c0.map((v,j)=>Math.round(v+(c1[j]-v)*u));
+  LUT[i*4]=c[0]/255; LUT[i*4+1]=c[1]/255; LUT[i*4+2]=c[2]/255; LUT[i*4+3]=1;
+  LUT32[i]=(255<<24)|(c[2]<<16)|(c[1]<<8)|c[0];
+}
+
+/* ---------- CPU FFT (double-precision butterflies, used for init and CPU engine) ---------- */
+function makeFFT(N){
+  const logN=Math.round(Math.log2(N)), rev=new Uint32Array(N);
+  for(let i=0;i<N;i++){let r=0,x=i;for(let b=0;b<logN;b++){r=(r<<1)|(x&1);x>>=1;}rev[i]=r;}
+  const cs=new Float64Array(N/2), sn=new Float64Array(N/2);
+  for(let k=0;k<N/2;k++){cs[k]=Math.cos(2*Math.PI*k/N); sn[k]=-Math.sin(2*Math.PI*k/N);}
+  const tr=new Float64Array(N), ti=new Float64Array(N);
+  function f1(re,im,off,stride,sign){
+    for(let i=0;i<N;i++){const j=rev[i],p=off+i*stride; tr[j]=re[p]; ti[j]=im[p];}
+    for(let size=2,step=N>>1; size<=N; size<<=1, step>>=1){
+      const half=size>>1;
+      for(let s0=0;s0<N;s0+=size){
+        for(let k=0,t=0;k<half;k++,t+=step){
+          const wr=cs[t], wi=sign*sn[t], a=s0+k, b=a+half;
+          const xr=tr[b]*wr-ti[b]*wi, xi=tr[b]*wi+ti[b]*wr;
+          tr[b]=tr[a]-xr; ti[b]=ti[a]-xi; tr[a]+=xr; ti[a]+=xi;
+        }
+      }
+    }
+    for(let i=0;i<N;i++){const p=off+i*stride; re[p]=tr[i]; im[p]=ti[i];}
+  }
+  function f2(re,im,sign){ for(let y=0;y<N;y++) f1(re,im,y*N,1,sign); for(let x=0;x<N;x++) f1(re,im,x,N,sign); }
+  return { f2, cs, sn };
+}
+let fftCache=null;
+function getFFT(N){ if(!fftCache||fftCache.N!==N){ fftCache={N,fft:makeFFT(N)}; } return fftCache.fft; }
+
+/* ---------- ETD1 coefficients, double precision, stored f32 interleaved [E, Phi/NN] ---------- */
+function buildCoefs(N,dx,r,C,dt,fd,Arr=Float32Array){
+  const NN=N*N, out=new Arr(2*NN), inv=1/NN, idx2=1/(dx*dx);
+  const c=new Float64Array(N), k=new Float64Array(N);
+  for(let m=0;m<N;m++){ c[m]=Math.cos(2*Math.PI*m/N); const ms=m<=N/2?m:m-N; k[m]=2*Math.PI*ms/(N*dx); }
+  for(let n=0;n<N;n++) for(let m=0;m<N;m++){
+    const i=n*N+m;
+    let K2 = fd ? (10/3 - (4/3)*(c[m]+c[n]) - (2/3)*c[m]*c[n])*idx2 : k[m]*k[m]+k[n]*k[n];
+    if(i===0 || K2<0) K2=0;
+    const q=1-K2, L=-K2*(r+q*q+C), x=L*dt;
+    out[2*i]=Math.exp(x);
+    const phi = L!==0 ? Math.expm1(x)/L : dt;
+    out[2*i+1] = -K2*phi*inv;
+  }
+  return out;
+}
+
+/* ---------- hot initial state, returned as normalized spectrum F(psi)/NN ---------- */
+function quenchSpectrum(N,psibar,A,seed){
+  const NN=N*N, re=new Float64Array(NN), im=new Float64Array(NN);
+  for(let i=0;i<NN;i++) re[i]=A*(2*noiseU(seed,0,i,0)-1);
+  getFFT(N).f2(re,im,1);
+  const out=new Float64Array(2*NN), inv=1/NN;
+  for(let i=0;i<NN;i++){ out[2*i]=re[i]*inv; out[2*i+1]=im[i]*inv; }
+  out[0]=psibar; out[1]=0;
+  return out;
+}
+
+/* ---------- crystal seeds and vacancy selection (shared by both engines) ---------- */
+function q0For(fd){ return fd ? Math.acos(1-DX*DX/2)/DX : 1; }  // where the operator's K^2 = 1 along an axis
+function hexAmplitude(r,pb){  // one-mode triangular amplitude: minimize the one-mode free energy over A
+  const M=48, pts=[], q=[[1,0],[-0.5,Math.sqrt(3)/2],[-0.5,-Math.sqrt(3)/2]], Lx=4*Math.PI, Ly=4*Math.PI/Math.sqrt(3);
+  for(let a=0;a<M;a++) for(let b=0;b<M;b++){ const x=(a+0.5)/M*Lx, y=(b+0.5)/M*Ly; let s=0; for(const v of q) s+=Math.cos(v[0]*x+v[1]*y); pts.push(s); }
+  const f=A=>{ let q4=0; for(const s of pts){ const p=pb+A*s; q4+=p*p*p*p; } return 0.75*r*A*A+0.25*q4/pts.length; };
+  let best=0, fb=f(0); for(let A=-1;A<=1;A+=0.0025){ const v=f(A); if(v<fb){ fb=v; best=A; } }
+  return best===0 ? (pb<=0?0.25:-0.25) : best;
+}
+function hexVectors(N,q0,theta){  // rounded to the box's reciprocal lattice so the crystal is periodic
+  const dk=2*Math.PI/(N*DX), rd=v=>Math.round(v/dk)*dk;
+  const q1=[rd(q0*Math.cos(theta)), rd(q0*Math.sin(theta))];
+  const q2=[rd(q0*Math.cos(theta+2*Math.PI/3)), rd(q0*Math.sin(theta+2*Math.PI/3))];
+  return [q1,q2,[-q1[0]-q2[0],-q1[1]-q2[1]]];
+}
+function crystalSpectrum(N,r,pb,fd,thetaDeg){  // thetaDeg null: single crystal; else grain 2 in the middle half
+  const NN=N*N, re=new Float64Array(NN), im=new Float64Array(NN), A=hexAmplitude(r,pb), q0=q0For(fd);
+  const G1=hexVectors(N,q0,0), G2=thetaDeg==null?null:hexVectors(N,q0,thetaDeg*Math.PI/180);
+  for(let y=0;y<N;y++) for(let x=0;x<N;x++){
+    const G = (G2 && y>=N/4 && y<3*N/4) ? G2 : G1, X=x*DX, Y=y*DX;
+    let v=0; for(const q of G) v+=Math.cos(q[0]*X+q[1]*Y);
+    re[y*N+x]=A*v;
+  }
+  getFFT(N).f2(re,im,1);
+  const out=new Float64Array(2*NN), inv=1/NN;
+  for(let i=0;i<NN;i++){ out[2*i]=re[i]*inv; out[2*i+1]=im[i]*inv; }
+  out[0]=pb; out[1]=0;
+  return {spec:out, m:(Math.abs(pb)+3*Math.abs(A))**2};
+}
+/* Each cell finds the nearest local maximum of psi within 4 cells (an atom). If that atom is selected
+   (Philox stream 6, counter (atom cell, punch)), the cell's density above the mean is removed. */
+function vacancyDelta(psi,N,pb,conc,seed,event,out){
+  const at=(x,y)=>psi[((y%N+N)%N)*N+((x%N+N)%N)];
+  const isMax=(x,y)=>{ const c=at(x,y); if(c<pb+0.1) return false;
+    for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ if(!dx&&!dy) continue;
+      const o=at(x+dx,y+dy); if(o>c||(o===c&&dy*3+dx>0)) return false; }
+    return true; };
+  for(let y=0;y<N;y++) for(let x=0;x<N;x++){
+    let best=1000, bx=0, by=0;
+    for(let oy=-4;oy<=4;oy++) for(let ox=-4;ox<=4;ox++){
+      const d2=ox*ox+oy*oy; if(d2<best && d2<=20 && isMax(x+ox,y+oy)){ best=d2; bx=x+ox; by=y+oy; }
+    }
+    let d=0;
+    if(best<1000){ const j=((by%N+N)%N)*N+((bx%N+N)%N); if(noiseU(seed,6,j,event)<conc) d=-Math.max(at(x,y)-pb,0); }
+    out[y*N+x]=d;
+  }
+}
+
+/* ---------- multi-mode operator ---------- */
+function mmSymbol(K2){ let p=1; for(let i=0;i<S.nm;i++){ const d=S.Q[i]*S.Q[i]-K2; p*=d*d+S.b[i]; } return S.r+S.lam*p; }
+function mmMin(){ let m=Infinity; for(let k=0;k<=Math.PI/DX*1.5;k+=0.002){ const v=mmSymbol(k*k); if(v<m) m=v; } return m; }
+function buildCoefsMM(N,dx,C,dt,Arr=Float32Array){
+  const NN=N*N, out=new Arr(2*NN), inv=1/NN, k=new Float64Array(N);
+  for(let m=0;m<N;m++){ const ms=m<=N/2?m:m-N; k[m]=2*Math.PI*ms/(N*dx); }
+  for(let n=0;n<N;n++) for(let m=0;m<N;m++){
+    const i=n*N+m, K2=i===0?0:k[m]*k[m]+k[n]*k[n], L=-K2*(mmSymbol(K2)+C), x=L*dt;
+    out[2*i]=Math.exp(x); out[2*i+1]= i===0 ? 0 : -K2*(L!==0?Math.expm1(x)/L:dt)*inv;
+  }
+  return out;
+}
+/* target lattices: real-space basis (a1, a2) scaled so the smallest reciprocal vector has length Q1 */
+function latticeBasis(type,rho,Q1){
+  let a1,a2;
+  if(type==='square'){ a1=[1,0]; a2=[0,1]; }
+  else if(type==='rect'){ a1=[1,0]; a2=[0,rho]; }
+  else if(type==='stripe'){ a1=[1,0]; a2=[0,1e6]; }
+  else { a1=[1,0]; a2=[0.5,Math.sqrt(3)/2]; }
+  const det=a1[0]*a2[1]-a1[1]*a2[0], b1=[2*Math.PI*a2[1]/det,-2*Math.PI*a2[0]/det], b2=[-2*Math.PI*a1[1]/det,2*Math.PI*a1[0]/det];
+  let gmin=Infinity; for(let i=-2;i<=2;i++) for(let j=-2;j<=2;j++){ if(!i&&!j) continue; const g=Math.hypot(i*b1[0]+j*b2[0],i*b1[1]+j*b2[1]); if(g>1e-3&&g<gmin) gmin=g; }
+  const sc=gmin/Q1;  // scale real space up by sc so |G|min = Q1
+  a1=a1.map(v=>v*sc); a2=a2.map(v=>v*sc);
+  return { a1, a2, b1:b1.map(v=>v/sc), b2:b2.map(v=>v/sc),
+           basis: type==='honey' ? [[1/3,1/3],[2/3,2/3]] : [[0,0]] };
+}
+function reciprocalPoints(L,kmax){ const pts=[];
+  if(S.lattice==='stripe'){ const g=Math.hypot(...L.b1); for(let n=1;n*g<=kmax;n++){ pts.push([n*L.b1[0],n*L.b1[1],n*g],[-n*L.b1[0],-n*L.b1[1],n*g]); } return pts; } const M=Math.ceil(kmax/Math.min(Math.hypot(...L.b1),Math.hypot(...L.b2)))+1;
+  for(let i=-M;i<=M;i++) for(let j=-M;j<=M;j++){ if(!i&&!j) continue; const gx=i*L.b1[0]+j*L.b2[0], gy=i*L.b1[1]+j*L.b2[1], g=Math.hypot(gx,gy); if(g<=kmax) pts.push([gx,gy,g]); }
+  return pts; }
+function shellList(L,n){ const ks=[...new Set(reciprocalPoints(L,12).map(p=>+p[2].toFixed(6)))].sort((a,b)=>a-b); return ks.slice(0,n); }
+function onRing(g){ for(let i=0;i<S.nm;i++) if(Math.abs(g-S.Q[i])<0.02*S.Q[i]) return i; return -1; }
+function seedTargetField(N){
+  const L=latticeBasis(S.lattice,S.rho,Math.min(...S.Q.slice(0,S.nm))), dk=2*Math.PI/(N*DX), rd=v=>Math.round(v/dk)*dk;
+  const Gs=[]; for(const [gx,gy,g] of reciprocalPoints(L,Math.max(...S.Q.slice(0,S.nm))*1.05)){ const i=onRing(g); if(i>=0) Gs.push([rd(gx),rd(gy),i]); }
+  if(S.lattice==='stripe'){ Gs.length=0; Gs.push([rd(S.Q[0]),0,0],[-rd(S.Q[0]),0,0]); }
+  const sgn=S.lattice==='honey'?-1:1, A=0.3, f=new Float64Array(N*N);
+  for(let y=0;y<N;y++) for(let x=0;x<N;x++){ let v=0; for(const [gx,gy,i] of Gs) v+=(i===0?sgn:0.4)*Math.cos(gx*x*DX+gy*y*DX); f[y*N+x]=S.psibar+A*v/2; }
+  return f;
+}
+
+/* ---------- CPU engine ---------- */
+function makeCPU(canvas,f64){
+  const ctx=canvas.getContext('2d');
+  const Arr=f64?Float64Array:Float32Array;
+  const B={name:f64?'CPU f64':'CPU f32', gen:0, onStats:null, coefType:Arr};
+  let N,NN,fft,h,wr,wi,psiR,bre,bim,coef,C=1,img,px,sk;
+  B.init=async n=>{
+    N=n; NN=n*n; fft=getFFT(n);
+    h=new Arr(2*NN); wr=new Arr(NN); wi=new Arr(NN);
+    psiR=new Arr(NN); bre=new Float64Array(NN); bim=new Float64Array(NN); sk=new Float64Array(NN);
+    canvas.width=n; canvas.height=n; img=ctx.createImageData(n,n); px=new Uint32Array(img.data.buffer);
+  };
+  B.setState=spec=>{ h.set(spec); };
+  let G3=0;
+  B.setCoefs=(cf,c,g)=>{ coef=cf; C=c; G3=g; };
+  B.setPsibar=v=>{ h[0]=v; h[1]=0; };
+  function step(){
+    for(let i=0;i<NN;i++){ wr[i]=h[2*i]; wi[i]=h[2*i+1]; }
+    fft.f2(wr,wi,-1);
+    let m=0, bad=false;
+    for(let i=0;i<NN;i++){
+      const p=wr[i]; psiR[i]=p; const pp=p*p;
+      if(pp>m) m=pp; else if(pp!==pp) bad=true;
+      wr[i]=p*(pp-C)-G3*pp; wi[i]=0;
+    }
+    fft.f2(wr,wi,1);
+    for(let i=0;i<NN;i++){
+      const e=coef[2*i], q=coef[2*i+1];
+      h[2*i]=e*h[2*i]+q*wr[i]; h[2*i+1]=e*h[2*i+1]+q*wi[i];
+    }
+    return bad?Infinity:m;
+  }
+  function brush(b){
+    bre.fill(0); bim.fill(0);
+    const R=b.R, r2=b.rad*b.rad, fx=Math.floor(b.cx), fy=Math.floor(b.cy);
+    for(let oy=-R;oy<=R;oy++) for(let ox=-R;ox<=R;ox++){
+      const x=((fx+ox)%N+N)%N, y=((fy+oy)%N+N)%N, i=y*N+x;
+      const ddx=ox+0.5-(b.cx-fx), ddy=oy+0.5-(b.cy-fy);
+      bre[i]=b.amp*Math.exp(-(ddx*ddx+ddy*ddy)/r2)*(2*noiseU(b.seed,1,i,b.event)-1);
+    }
+    inject();
+  }
+  function inject(){  // add the real field in bre to the state, skipping k = 0 so mass is conserved
+    bim.fill(0); fft.f2(bre,bim,1);
+    const inv=1/NN;
+    for(let i=1;i<NN;i++){ h[2*i]+=bre[i]*inv; h[2*i+1]+=bim[i]*inv; }
+  }
+  function punch(v){ vacancyDelta(psiR,N,v.pb,v.conc,v.seed,v.event,bre); inject(); }
+  B.frame=(n,b,view)=>{
+    const t0=performance.now(); let done=0, m=0, smax=0;
+    if(b) brush(b);
+    if(view.vac) punch(view.vac);
+    while(done<n){ const mm=step(); if(mm>m||mm===Infinity) m=mm; done++; if(performance.now()-t0>14) break; }
+    if(done>0){
+      const a=view.alpha;
+      sk[0]=0;
+      for(let i=1;i<NN;i++){ const v=sk[i]+a*(h[2*i]*h[2*i]+h[2*i+1]*h[2*i+1]-sk[i]); sk[i]=v; if(v>smax) smax=v; }
+    }
+    if(view.mode===1){
+      const W=view.W, span=2*W+1, lo=view.logMax-view.decades, RR=view.ringPx.map(q=>q*N/span), c0=(W+0.5)*N/span;
+      for(let y=0;y<N;y++){
+        const ky=Math.floor((y+0.5)/N*span)-W, row=((ky%N+N)%N)*N;
+        for(let x=0;x<N;x++){
+          const kx=Math.floor((x+0.5)/N*span)-W, v=sk[row+((kx%N+N)%N)];
+          let t=((Math.log10(v>1e-30?v:1e-30)-lo)/view.decades*255+0.5)|0; t=t<0?0:t>255?255:t;
+          let col=LUT32[t];
+          if(view.rings){ const rs=Math.hypot(x+0.5-c0,y+0.5-c0);
+            for(const R0 of RR) if(Math.abs(rs-R0)<0.6) col=0xFF8C8C8C; }
+          px[y*N+x]=col;
+        }
+      }
+    } else {
+      const s=255/(view.hi-view.lo);
+      for(let i=0;i<NN;i++){ let t=((psiR[i]-view.lo)*s+0.5)|0; t=t<0?0:t>255?255:t; px[i]=LUT32[t]; }
+    }
+    ctx.putImageData(img,0,0);
+    if(done>0 && B.onStats) B.onStats(m,B.gen,smax);
+    return done;
+  };
+  B._psi=()=>psiR; B._h=()=>h; B._sk=()=>sk;
+  B.readSK=()=>Promise.resolve(sk);
+  B.destroy=()=>{};
+  return B;
+}
+
+/* ---------- WebGPU engine ---------- */
+function fftWGSL(N,sign){
+  const logN=Math.round(Math.log2(N)), WG=Math.min(256,N/2);
+  return `
+const N:u32=${N}u; const LOGN:u32=${logN}u; const WG:u32=${WG}u; const SIGN:f32=${sign}.0;
+@group(0) @binding(0) var<storage,read> src: array<vec2f>;
+@group(0) @binding(1) var<storage,read_write> dst: array<vec2f>;
+@group(0) @binding(2) var<storage,read> tw: array<vec2f>;
+var<workgroup> s: array<vec2f, ${N}>;
+@compute @workgroup_size(${WG})
+fn main(@builtin(workgroup_id) wg: vec3u, @builtin(local_invocation_index) li: u32) {
+  let row = wg.x;
+  let base = row * N;
+  for (var i = li; i < N; i += WG) { s[reverseBits(i) >> (32u - LOGN)] = src[base + i]; }
+  workgroupBarrier();
+  for (var st = 0u; st < LOGN; st++) {
+    let m = 1u << st;
+    for (var j = li; j < N / 2u; j += WG) {
+      let k = j & (m - 1u);
+      let i0 = ((j >> st) << (st + 1u)) + k;
+      let i1 = i0 + m;
+      var w = tw[k << (LOGN - 1u - st)];
+      w.y = w.y * SIGN;
+      let a = s[i0];
+      let b = s[i1];
+      let t = vec2f(w.x * b.x - w.y * b.y, w.x * b.y + w.y * b.x);
+      s[i0] = a + t;
+      s[i1] = a - t;
+    }
+    workgroupBarrier();
+  }
+  for (var i = li; i < N; i += WG) { dst[i * N + row] = s[i]; }
+}`;
+}
+const PRM = `struct Prm { C: f32, NN: u32, invNN: f32, g: f32 };`;
+const NL_WGSL = PRM + `
+@group(0) @binding(0) var<storage, read> psi: array<vec2f>;
+@group(0) @binding(1) var<storage, read_write> g: array<vec2f>;
+@group(0) @binding(2) var<storage, read_write> psiR: array<f32>;
+@group(0) @binding(3) var<storage, read_write> stats: array<atomic<u32>>;
+@group(0) @binding(4) var<uniform> prm: Prm;
+var<workgroup> wm: atomic<u32>;
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u, @builtin(local_invocation_index) li: u32) {
+  if (li == 0u) { atomicStore(&wm, 0u); }
+  workgroupBarrier();
+  let i = gid.x;
+  if (i < prm.NN) {
+    let p = psi[i].x;
+    psiR[i] = p;
+    let pp = p * p;
+    g[i] = vec2f(p * (pp - prm.C) - prm.g * pp, 0.0);
+    atomicMax(&wm, bitcast<u32>(pp));
+  }
+  workgroupBarrier();
+  if (li == 0u) { atomicMax(&stats[0], atomicLoad(&wm)); }
+}`;
+const UPD_WGSL = PRM + `
+@group(0) @binding(0) var<storage, read_write> h: array<vec2f>;
+@group(0) @binding(1) var<storage, read> g: array<vec2f>;
+@group(0) @binding(2) var<storage, read> cf: array<vec2f>;
+@group(0) @binding(3) var<uniform> prm: Prm;
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u) {
+  let i = gid.x;
+  if (i >= prm.NN) { return; }
+  let c = cf[i];
+  h[i] = c.x * h[i] + c.y * g[i];
+}`;
+const INJ_WGSL = PRM + `
+@group(0) @binding(0) var<storage, read_write> h: array<vec2f>;
+@group(0) @binding(1) var<storage, read> g: array<vec2f>;
+@group(0) @binding(2) var<uniform> prm: Prm;
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u) {
+  let i = gid.x;
+  if (i >= prm.NN || i == 0u) { return; }
+  h[i] = h[i] + g[i] * prm.invNN;
+}`;
+const PHILOX_WGSL = `
+fn mulhi(a: u32, c: u32) -> u32 {
+  let a0 = a & 0xffffu; let a1 = a >> 16u; let c0 = c & 0xffffu; let c1 = c >> 16u;
+  let p00 = a0 * c0; let p01 = a0 * c1; let p10 = a1 * c0; let p11 = a1 * c1;
+  let mid = (p00 >> 16u) + (p01 & 0xffffu) + (p10 & 0xffffu);
+  return p11 + (p01 >> 16u) + (p10 >> 16u) + (mid >> 16u);
+}
+fn philox0(ctr: vec4u, key: vec2u) -> u32 {
+  var c = ctr;
+  var k = key;
+  for (var r = 0u; r < 10u; r++) {
+    if (r > 0u) { k = k + vec2u(0x9E3779B9u, 0xBB67AE85u); }
+    let lo0 = 0xD2511F53u * c.x; let hi0 = mulhi(0xD2511F53u, c.x);
+    let lo1 = 0xCD9E8D57u * c.z; let hi1 = mulhi(0xCD9E8D57u, c.z);
+    c = vec4u(hi1 ^ c.y ^ k.x, lo1, hi0 ^ c.w ^ k.y, lo0);
+  }
+  return c.x;
+}`;
+const BRUSH_WGSL = `
+struct Br { cx: f32, cy: f32, rad: f32, amp: f32, seed: u32, N: u32, event: u32, R: u32 };
+@group(0) @binding(0) var<storage, read_write> outp: array<vec2f>;
+@group(0) @binding(1) var<uniform> b: Br;
+` + PHILOX_WGSL + `
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u) {
+  let NN = b.N * b.N;
+  let i = gid.x;
+  if (i >= NN) { return; }
+  let n = i32(b.N);
+  let R = i32(b.R);
+  let fx = floor(b.cx);
+  let fy = floor(b.cy);
+  var ox = i32(i % b.N) - i32(fx);
+  var oy = i32(i / b.N) - i32(fy);
+  ox = ((ox + n / 2) % n + n) % n - n / 2;
+  oy = ((oy + n / 2) % n + n) % n - n / 2;
+  if (abs(ox) > R || abs(oy) > R) { outp[i] = vec2f(0.0, 0.0); return; }
+  let dx = f32(ox) + 0.5 - (b.cx - fx);
+  let dy = f32(oy) + 0.5 - (b.cy - fy);
+  let m = exp(-(dx * dx + dy * dy) / (b.rad * b.rad));
+  let u = f32(philox0(vec4u(i, b.event, 0u, 0u), vec2u(b.seed, 1u)) >> 8u) * 5.9604644775390625e-8;
+  outp[i] = vec2f(b.amp * m * (2.0 * u - 1.0), 0.0);
+}`;
+const SK_WGSL = `
+struct Sk { alpha: f32, NN: u32, p0: u32, p1: u32 };
+@group(0) @binding(0) var<storage, read> h: array<vec2f>;
+@group(0) @binding(1) var<storage, read_write> sk: array<f32>;
+@group(0) @binding(2) var<storage, read_write> stats: array<atomic<u32>>;
+@group(0) @binding(3) var<uniform> sp: Sk;
+var<workgroup> wm: atomic<u32>;
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u, @builtin(local_invocation_index) li: u32) {
+  if (li == 0u) { atomicStore(&wm, 0u); }
+  workgroupBarrier();
+  let i = gid.x;
+  if (i < sp.NN) {
+    var v = 0.0;
+    if (i != 0u) { let z = h[i]; v = mix(sk[i], dot(z, z), sp.alpha); }
+    sk[i] = v;
+    atomicMax(&wm, bitcast<u32>(v));
+  }
+  workgroupBarrier();
+  if (li == 0u) { atomicMax(&stats[1], atomicLoad(&wm)); }
+}`;
+const VAC_WGSL = `
+struct Vp { conc: f32, pb: f32, N: u32, seed: u32, event: u32, p0: u32, p1: u32, p2: u32 };
+@group(0) @binding(0) var<storage, read> psiR: array<f32>;
+@group(0) @binding(1) var<storage, read_write> outp: array<vec2f>;
+@group(0) @binding(2) var<uniform> vp: Vp;
+` + PHILOX_WGSL + `
+fn wrapi(v: i32) -> u32 { let n = i32(vp.N); return u32(((v % n) + n) % n); }
+fn at(x: i32, y: i32) -> f32 { return psiR[wrapi(y) * vp.N + wrapi(x)]; }
+fn isMax(x: i32, y: i32) -> bool {
+  let c = at(x, y);
+  if (c < vp.pb + 0.1) { return false; }
+  for (var dy = -1; dy <= 1; dy++) {
+    for (var dx = -1; dx <= 1; dx++) {
+      if (dx == 0 && dy == 0) { continue; }
+      let o = at(x + dx, y + dy);
+      if (o > c || (o == c && dy * 3 + dx > 0)) { return false; }
+    }
+  }
+  return true;
+}
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) gid: vec3u) {
+  let i = gid.x;
+  if (i >= vp.N * vp.N) { return; }
+  let x = i32(i % vp.N);
+  let y = i32(i / vp.N);
+  var best = 1000;
+  var bx = 0;
+  var by = 0;
+  for (var oy = -4; oy <= 4; oy++) {
+    for (var ox = -4; ox <= 4; ox++) {
+      let d2 = ox * ox + oy * oy;
+      if (d2 < best && d2 <= 20 && isMax(x + ox, y + oy)) { best = d2; bx = x + ox; by = y + oy; }
+    }
+  }
+  var d = 0.0;
+  if (best < 1000) {
+    let j = wrapi(by) * vp.N + wrapi(bx);
+    let u = f32(philox0(vec4u(j, vp.event, 0u, 0u), vec2u(vp.seed, 6u)) >> 8u) * 5.9604644775390625e-8;
+    if (u < vp.conc) { d = -max(at(x, y) - vp.pb, 0.0); }
+  }
+  outp[i] = vec2f(d, 0.0);
+}`;
+const RENDER_WGSL = `
+struct R { lo: f32, hi: f32, N: u32, mode: u32, W: u32, logMax: f32, decades: f32, q0px: f32,
+           rings: f32, q1px: f32, q2px: f32, q3px: f32 };
+@group(0) @binding(0) var<storage, read> psiR: array<f32>;
+@group(0) @binding(1) var<storage, read> lut: array<vec4f>;
+@group(0) @binding(2) var<uniform> rp: R;
+@group(0) @binding(3) var<storage, read> sk: array<f32>;
+@vertex fn vs(@builtin(vertex_index) vi: u32) -> @builtin(position) vec4f {
+  var p = array<vec2f, 3>(vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
+  return vec4f(p[vi], 0.0, 1.0);
+}
+@fragment fn fs(@builtin(position) pos: vec4f) -> @location(0) vec4f {
+  let x = min(u32(pos.x), rp.N - 1u);
+  let y = min(u32(pos.y), rp.N - 1u);
+  if (rp.mode == 1u) {
+    let n = i32(rp.N);
+    let W = i32(rp.W);
+    let span = f32(2 * W + 1);
+    let kx = i32(floor(pos.x / f32(rp.N) * span)) - W;
+    let ky = i32(floor(pos.y / f32(rp.N) * span)) - W;
+    let idx = u32(((ky % n) + n) % n) * rp.N + u32(((kx % n) + n) % n);
+    let s = max(sk[idx], 1e-30);
+    let t = clamp((log2(s) * 0.30103 - (rp.logMax - rp.decades)) / rp.decades, 0.0, 1.0);
+    var c = lut[u32(t * 255.0 + 0.5)].rgb;
+    if (rp.rings > 0.5) {
+      let c0 = (f32(W) + 0.5) * f32(rp.N) / span;
+      let rs = length(pos.xy - vec2f(c0, c0));
+      let sc = f32(rp.N) / span;
+      let rr = vec4f(rp.q0px, rp.q1px, rp.q2px, rp.q3px) * sc;
+      for (var j = 0; j < 4; j++) {
+        if (rr[j] > 0.0 && abs(rs - rr[j]) < 0.6) { c = vec3f(0.55, 0.55, 0.55); }
+      }
+    }
+    return vec4f(c, 1.0);
+  }
+  let v = psiR[y * rp.N + x];
+  let t = clamp((v - rp.lo) / (rp.hi - rp.lo), 0.0, 1.0);
+  return vec4f(lut[u32(t * 255.0 + 0.5)].rgb, 1.0);
+}`;
+
+async function makeGPU(canvas){
+  if(!('gpu' in navigator)) return null;
+  const adapter=await navigator.gpu.requestAdapter({powerPreference:'high-performance'});
+  if(!adapter) return null;
+  const device=await adapter.requestDevice();
+  const ctx=canvas.getContext('webgpu');
+  if(!ctx){ device.destroy(); return null; }
+  const fmt=navigator.gpu.getPreferredCanvasFormat();
+  const U=GPUBufferUsage;
+  const B={name:'GPU f32', gen:0, onStats:null, device, coefType:Float32Array};
+  device.pushErrorScope('validation');
+  const comp=code=>device.createComputePipeline({layout:'auto',compute:{module:device.createShaderModule({code}),entryPoint:'main'}});
+  const P={ nl:comp(NL_WGSL), up:comp(UPD_WGSL), inj:comp(INJ_WGSL), br:comp(BRUSH_WGSL), sk:comp(SK_WGSL), vac:comp(VAC_WGSL) };
+  const rmod=device.createShaderModule({code:RENDER_WGSL});
+  P.render=device.createRenderPipeline({layout:'auto',
+    vertex:{module:rmod,entryPoint:'vs'}, fragment:{module:rmod,entryPoint:'fs',targets:[{format:fmt}]},
+    primitive:{topology:'triangle-list'}});
+  const err0=await device.popErrorScope();
+  if(err0){ device.destroy(); throw new Error(err0.message); }
+
+  let N,NN,buf={},bgs={},ring=[],fftF,fftI;
+  const mk=(size,usage)=>device.createBuffer({size,usage});
+  const bg=(pipe,list)=>device.createBindGroup({layout:pipe.getBindGroupLayout(0),
+    entries:list.map((b,i)=>({binding:i,resource:{buffer:b}}))});
+
+  B.init=async n=>{
+    for(const k in buf) buf[k].destroy(); buf={};
+    ring.forEach(r=>{ try{ r.buf.destroy(); }catch(e){} }); ring=[];
+    N=n; NN=n*n;
+    canvas.width=n; canvas.height=n;
+    ctx.configure({device,format:fmt,alphaMode:'opaque'});
+    device.pushErrorScope('validation');
+    const cx=NN*8;
+    buf.h=mk(cx,U.STORAGE|U.COPY_DST); buf.a=mk(cx,U.STORAGE); buf.b=mk(cx,U.STORAGE);
+    buf.psiR=mk(NN*4,U.STORAGE); buf.coef=mk(cx,U.STORAGE|U.COPY_DST);
+    buf.tw=mk(N*4,U.STORAGE|U.COPY_DST); buf.stats=mk(16,U.STORAGE|U.COPY_SRC|U.COPY_DST);
+    buf.prm=mk(16,U.UNIFORM|U.COPY_DST); buf.brush=mk(32,U.UNIFORM|U.COPY_DST);
+    buf.rprm=mk(48,U.UNIFORM|U.COPY_DST); buf.lut=mk(256*16,U.STORAGE|U.COPY_DST);
+    buf.sk=mk(NN*4,U.STORAGE|U.COPY_SRC); buf.skr=mk(NN*4,U.MAP_READ|U.COPY_DST); skBusy=false; buf.skp=mk(16,U.UNIFORM|U.COPY_DST); buf.vprm=mk(32,U.UNIFORM|U.COPY_DST);
+    for(let i=0;i<3;i++) ring.push({buf:mk(16,U.MAP_READ|U.COPY_DST),busy:false});
+    device.queue.writeBuffer(buf.lut,0,LUT);
+    const tw=new Float32Array(N); // N/2 complex twiddles exp(-2πik/N), computed in f64
+    for(let k=0;k<N/2;k++){ tw[2*k]=Math.cos(2*Math.PI*k/N); tw[2*k+1]=-Math.sin(2*Math.PI*k/N); }
+    device.queue.writeBuffer(buf.tw,0,tw);
+    fftF=comp(fftWGSL(N,1)); fftI=comp(fftWGSL(N,-1));
+    bgs.i1=bg(fftI,[buf.h,buf.a,buf.tw]); bgs.i2=bg(fftI,[buf.a,buf.b,buf.tw]);
+    bgs.nl=bg(P.nl,[buf.b,buf.a,buf.psiR,buf.stats,buf.prm]);
+    bgs.f1=bg(fftF,[buf.a,buf.b,buf.tw]); bgs.f2=bg(fftF,[buf.b,buf.a,buf.tw]);
+    bgs.up=bg(P.up,[buf.h,buf.a,buf.coef,buf.prm]);
+    bgs.br=bg(P.br,[buf.a,buf.brush]);
+    bgs.inj=bg(P.inj,[buf.h,buf.a,buf.prm]);
+    bgs.r=bg(P.render,[buf.psiR,buf.lut,buf.rprm,buf.sk]);
+    bgs.sk=bg(P.sk,[buf.h,buf.sk,buf.stats,buf.skp]);
+    bgs.vac=bg(P.vac,[buf.psiR,buf.a,buf.vprm]);
+    const err=await device.popErrorScope();
+    if(err) throw new Error(err.message);
+  };
+  B.setState=spec=>device.queue.writeBuffer(buf.h,0,new Float32Array(spec));
+  B.setPsibar=v=>device.queue.writeBuffer(buf.h,0,new Float32Array([v,0]));
+  B.setCoefs=(cf,C,g)=>{
+    const dv=new DataView(new ArrayBuffer(16));
+    dv.setFloat32(0,C,true); dv.setUint32(4,NN,true); dv.setFloat32(8,1/NN,true); dv.setFloat32(12,g,true);
+    device.queue.writeBuffer(buf.prm,0,dv.buffer);
+    device.queue.writeBuffer(buf.coef,0,cf);
+  };
+  B.frame=(n,b,view)=>{
+    const rv=new DataView(new ArrayBuffer(48));
+    rv.setFloat32(0,view.lo,true); rv.setFloat32(4,view.hi,true); rv.setUint32(8,N,true); rv.setUint32(12,view.mode,true);
+    rv.setUint32(16,view.W,true); rv.setFloat32(20,view.logMax,true); rv.setFloat32(24,view.decades,true);
+    rv.setFloat32(28,view.ringPx[0]||0,true); rv.setFloat32(32,view.rings?1:0,true);
+    rv.setFloat32(36,view.ringPx[1]||0,true); rv.setFloat32(40,view.ringPx[2]||0,true); rv.setFloat32(44,view.ringPx[3]||0,true);
+    device.queue.writeBuffer(buf.rprm,0,rv.buffer);
+    const sv=new DataView(new ArrayBuffer(16)); sv.setFloat32(0,view.alpha,true); sv.setUint32(4,NN,true);
+    device.queue.writeBuffer(buf.skp,0,sv.buffer);
+    if(view.vac){
+      const v=new DataView(new ArrayBuffer(32));
+      v.setFloat32(0,view.vac.conc,true); v.setFloat32(4,view.vac.pb,true); v.setUint32(8,N,true);
+      v.setUint32(12,view.vac.seed,true); v.setUint32(16,view.vac.event,true);
+      device.queue.writeBuffer(buf.vprm,0,v.buffer);
+    }
+    if(b){
+      const d=new DataView(new ArrayBuffer(32));
+      d.setFloat32(0,b.cx,true); d.setFloat32(4,b.cy,true); d.setFloat32(8,b.rad,true); d.setFloat32(12,b.amp,true);
+      d.setUint32(16,b.seed,true); d.setUint32(20,N,true); d.setUint32(24,b.event,true); d.setUint32(28,b.R,true);
+      device.queue.writeBuffer(buf.brush,0,d.buffer);
+    }
+    const enc=device.createCommandEncoder();
+    if(n>0) enc.clearBuffer(buf.stats);
+    const cp=enc.beginComputePass();
+    const wgE=Math.ceil(NN/256);
+    const run=(p,g,x)=>{ cp.setPipeline(p); cp.setBindGroup(0,g); cp.dispatchWorkgroups(x); };
+    if(b){ run(P.br,bgs.br,wgE); run(fftF,bgs.f1,N); run(fftF,bgs.f2,N); run(P.inj,bgs.inj,wgE); }
+    if(view.vac){ run(P.vac,bgs.vac,wgE); run(fftF,bgs.f1,N); run(fftF,bgs.f2,N); run(P.inj,bgs.inj,wgE); }
+    for(let s=0;s<n;s++){
+      run(fftI,bgs.i1,N); run(fftI,bgs.i2,N);   // psi = F^-1 psiHat
+      run(P.nl,bgs.nl,wgE);                     // g = psi^3 - C psi
+      run(fftF,bgs.f1,N); run(fftF,bgs.f2,N);   // F g
+      run(P.up,bgs.up,wgE);                     // psiHat = E psiHat + Phi F g
+    }
+    if(n>0) run(P.sk,bgs.sk,wgE);
+    cp.end();
+    const rp=enc.beginRenderPass({colorAttachments:[{view:ctx.getCurrentTexture().createView(),
+      loadOp:'clear',storeOp:'store',clearValue:{r:0,g:0,b:0,a:1}}]});
+    rp.setPipeline(P.render); rp.setBindGroup(0,bgs.r); rp.draw(3); rp.end();
+    let rb=null;
+    if(n>0){ rb=ring.find(r=>!r.busy); if(rb){ enc.copyBufferToBuffer(buf.stats,0,rb.buf,0,8); rb.busy=true; } }
+    device.queue.submit([enc.finish()]);
+    if(rb){
+      const g=B.gen;
+      rb.buf.mapAsync(GPUMapMode.READ).then(()=>{
+        const vv=new Float32Array(rb.buf.getMappedRange(0,8).slice(0));
+        rb.buf.unmap(); rb.busy=false;
+        if(B.onStats) B.onStats(vv[0],g,vv[1]);
+      },()=>{ rb.busy=false; });
+    }
+    return n;
+  };
+  let skBusy=false;
+  B.readSK=()=>{
+    if(skBusy) return null;
+    skBusy=true;
+    const enc=device.createCommandEncoder(), dst=buf.skr;
+    enc.copyBufferToBuffer(buf.sk,0,dst,0,NN*4);
+    device.queue.submit([enc.finish()]);
+    return dst.mapAsync(GPUMapMode.READ).then(()=>{
+      const a=new Float32Array(dst.getMappedRange().slice(0)); dst.unmap(); skBusy=false; return a;
+    },()=>{ skBusy=false; return null; });
+  };
+  B.destroy=()=>{ B.dead=true; try{ device.destroy(); }catch(e){} };
+  device.lost.then(info=>{
+    if(B.dead || info.reason==='destroyed') return;
+    note('The GPU device was lost, so the simulation moved to the CPU.');
+    S.engine='cpu32'; $('#engine').value='cpu32'; start();
+  });
+  return B;
+}
+
+/* ---------- controller ---------- */
+let vacEvent=0, pendingVac=null, logMax=null, skReset=true, brushEvent=0, backend=null, gen=0, simT=0, lastM=1, Clevel=null, Ccur=1, lastLower=0, needOne=true;
+const pointer={down:false,cx:0,cy:0};
+
+function note(msg){ $('#note').textContent=msg||''; }
+function rebuildCoefs(){ if(backend) backend.setCoefs(buildCoefsMM(S.N,DX,Ccur,S.dt,backend.coefType),Ccur,S.g); }
+let symMinCache=null;
+function Cneed(m){ if(symMinCache==null) symMinCache=mmMin(); const rr=Math.max(0,-symMinCache);
+  return Math.max(0.3, rr+0.1, 1.6*m+Math.abs(S.g)*Math.sqrt(m)+rr+0.05); }
+function modelChanged(){ symMinCache=null; updateC(lastM,true); drawLattice(); }
+function updateC(m,force){
+  const L=Math.ceil(Math.log(Cneed(m))/Math.log(1.2)), now=performance.now();
+  const lower = Clevel!==null && L<Clevel-1 && now-lastLower>500;
+  if(force || Clevel===null || L>Clevel || lower){
+    if(lower) lastLower=now;
+    Clevel=L; Ccur=Math.pow(1.2,L); rebuildCoefs();
+  }
+}
+function onStats(m,g,smax){
+  if(g!==gen) return;
+  if(smax>0 && Number.isFinite(smax)){ const t=Math.log10(smax); logMax = logMax==null ? t : logMax+0.3*(t-logMax); }
+  if(!Number.isFinite(m) || m>1e4){ note('The field diverged, so it was quenched again.'); quench(); return; }
+  lastM=m;
+  if(!pointer.down) updateC(m);
+}
+function resetRun(spec,m){
+  prof=null;
+  gen++; backend.gen=gen; simT=0; brushEvent=0; vacEvent=0; pendingVac=null; skReset=true; logMax=null;
+  backend.setState(spec);
+  lastM=m; updateC(lastM,true);
+  needOne=true;
+}
+function quench(){ resetRun(quenchSpectrum(S.N,S.psibar,S.A,S.seed),(Math.abs(S.psibar)+S.A)**2); }
+function seedCrystal(theta){ const c=crystalSpectrum(S.N,S.r,S.psibar,S.fd,theta); resetRun(c.spec,c.m); }
+function freshCanvas(){
+  const old=$('#cv'), c=document.createElement('canvas');
+  c.id='cv'; c.setAttribute('aria-label','Density field ψ');
+  old.replaceWith(c); return c;
+}
+function syncGridOptions(){
+  const cpu=backend && backend.name.startsWith('CPU');
+  for(const o of $('#grid').options) o.disabled = cpu && +o.value>256;
+  $('#grid').value=String(S.N);
+}
+let starting=false;
+async function start(){
+  if(starting) return; starting=true;
+  if(backend){ backend.destroy(); backend=null; }
+  let be=null;
+  if(S.engine==='gpu32'){
+    let why='';
+    try{ const c=freshCanvas(); be=await makeGPU(c); if(be) await be.init(S.N); }
+    catch(e){ console.warn(e); why=String(e && e.message || e); if(be) be.destroy(); be=null; }
+    if(!be) note(why ? 'WebGPU failed, so the simulation runs on the CPU. Error: '+why.slice(0,400)
+                     : 'WebGPU isn’t available in this browser, so the simulation runs on the CPU.');
+  }
+  if(!be){
+    if(S.N>256) S.N = S.engine==='gpu32' ? 128 : 256;
+    const c=freshCanvas(); be=makeCPU(c,S.engine==='cpu64'); await be.init(S.N);
+  }
+  backend=be; backend.onStats=onStats; Clevel=null;
+  syncGridOptions(); quench();
+  $('#o-e').textContent=`${backend.name}, ${S.N}²`;
+  starting=false;
+}
+
+/* ---------- loop ---------- */
+let spsWin=0, spsT=performance.now(), sps=0, lastUI=0;
+function loop(now){
+  requestAnimationFrame(loop);
+  if(!backend || starting) return;
+  let n = S.paused ? (needOne?1:0) : S.spf;
+  let b=null;
+  if(pointer.down){
+    if(n===0) n=1;
+    b={cx:pointer.cx, cy:pointer.cy, rad:BRUSH_R, R:Math.ceil(3*BRUSH_R), amp:S.brushAmp, seed:S.seed, event:brushEvent++};
+    updateC(Math.max(lastM,(Math.abs(S.psibar)+0.9+S.brushAmp)**2));
+  }
+  needOne=false;
+  let vac=null;
+  if(pendingVac){ vac=pendingVac; pendingVac=null; if(n===0) n=1; }
+  const W=Math.min(S.N/2-1,Math.round(S.kmax*S.N*DX/(2*Math.PI)));
+  const view={lo:S.psibar-S.range, hi:S.psibar+S.range, mode:S.fourier?1:0, W,
+    logMax:logMax==null?-2:logMax, decades:S.decades, q0px:0, ringPx:S.Q.slice(0,S.nm).map(q=>q*S.N*DX/(2*Math.PI)), rings:S.rings,
+    alpha:skReset?1:S.kavg, vac};
+  const done=backend.frame(n,b,view);
+  if(done>0) skReset=false;
+  simT+=done*S.dt; spsWin+=done;
+  if(now-spsT>500){ sps=spsWin*1000/(now-spsT); spsWin=0; spsT=now; }
+  if(now-lastUI>250){
+    lastUI=now;
+    $('#o-t').textContent=simT.toFixed(0);
+    $('#o-sps').textContent=sps.toFixed(0);
+    $('#o-c').textContent=Ccur.toFixed(2);
+    $('#o-m').textContent=Math.sqrt(lastM).toFixed(2);
+    $('#o-e').textContent=`${backend.name}, ${S.N}²`;
+  }
+  requestProfiles(now);
+}
+
+/* ---------- radial and azimuthal profiles ---------- */
+function computeProfiles(sk,N,ringsPx){
+  const half=N>>1, rs=new Float64Array(half+1), rc=new Float64Array(half+1);
+  for(let n=0;n<N;n++){ const ky=n<=half?n:n-N;
+    for(let m=0;m<N;m++){ const i=n*N+m; if(!i) continue; const kx=m<=half?m:m-N, b=Math.round(Math.hypot(kx,ky)); if(b<=half){ rs[b]+=sk[i]; rc[b]++; } } }
+  const rad=[]; for(let b=1;b<=half;b++) rad.push(rc[b]?rs[b]/rc[b]:0);
+  let pk=0, pv=-1;
+  for(const q of ringsPx) for(let b=Math.max(1,Math.floor(0.85*q)); b<=Math.min(half,Math.ceil(1.15*q)); b++){ if(rad[b-1]>pv){ pv=rad[b-1]; pk=b; } }
+  const q0px=ringsPx[0];
+  let fw=null;
+  if(pv>0){ const hm=pv/2; let lo=pk, hi=pk;
+    while(lo>1 && rad[lo-2]>hm) lo--; while(hi<half && rad[hi]>hm) hi++;
+    const fl = lo>1 ? lo-1+(hm-rad[lo-2])/(rad[lo-1]-rad[lo-2]) : lo;
+    const fh = hi<half ? hi+(rad[hi-1]-hm)/(rad[hi-1]-rad[hi]) : hi;
+    fw=fh-fl; }
+  const NB=120, as=new Float64Array(NB), ac=new Float64Array(NB), r0=pk||q0px, w=Math.max(1.5,0.05*r0);
+  for(let n=0;n<N;n++){ const ky=n<=half?n:n-N;
+    for(let m=0;m<N;m++){ const kx=m<=half?m:m-N, rr=Math.hypot(kx,ky); if(Math.abs(rr-r0)>w||!(n*N+m)) continue;
+      let th=Math.atan2(-ky,kx)*180/Math.PI; if(th<0) th+=360; const b=Math.min(NB-1,Math.floor(th/3)); as[b]+=sk[n*N+m]; ac[b]++; } }
+  const az=[]; for(let b=0;b<NB;b++) az.push(ac[b]?as[b]/ac[b]:0);
+  const amax=Math.max(...az), amin=Math.min(...az.filter(v=>v>0)), above=az.map(v=>v>amax/2);
+  let spots=0, widths=0, start=above.indexOf(false);
+  if(start<0){ spots=0; } else {
+    let run=0;
+    for(let j=1;j<=NB;j++){ const b=(start+j)%NB; if(above[b]) run++; else if(run){ spots++; widths+=run*3; run=0; } }
+  }
+  return {rad, pk, pv, fw, az, spots, meanW: spots?widths/spots:0, contrast: amin>0?amax/amin:Infinity};
+}
+function drawLogPlot(cv,xs,ys,o){
+  const dpr=window.devicePixelRatio||1, W=cv.clientWidth, H=cv.clientHeight;
+  if(!W||!H) return;
+  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){ cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); }
+  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
+  const cs=getComputedStyle(document.documentElement), ink=cs.getPropertyValue('--ink').trim(),
+        muted=cs.getPropertyValue('--muted').trim(), line=cs.getPropertyValue('--line').trim(), acc=cs.getPropertyValue('--accent').trim();
+  g.font='11px "Instrument Sans", system-ui, sans-serif';
+  const L=44, R=10, T=8, B=22, pw=W-L-R, ph=H-T-B;
+  g.strokeStyle=line; g.lineWidth=1; g.strokeRect(L+0.5,T+0.5,pw,ph);
+  const pts=[]; for(let i=0;i<xs.length;i++) if(xs[i]>=o.xmin && xs[i]<=o.xmax && ys[i]>0) pts.push([xs[i],Math.log10(ys[i])]);
+  if(pts.length<2){ g.fillStyle=muted; g.fillText('Collecting data…',L+8,T+18); return; }
+  let y1=Math.ceil(Math.max(...pts.map(p=>p[1]))), y0=Math.max(y1-o.decades, Math.floor(Math.min(...pts.map(p=>p[1]))));
+  if(y1<=y0) y1=y0+1;
+  const X=x=>L+(x-o.xmin)/(o.xmax-o.xmin)*pw, Y=y=>T+(1-(Math.max(y,y0)-y0)/(y1-y0))*ph;
+  const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+  g.fillStyle=muted; g.textAlign='right'; g.textBaseline='middle';
+  const ystep=Math.max(1,Math.ceil((y1-y0)/4));
+  for(let e=y1;e>=y0;e-=ystep){ const y=Y(e); g.strokeStyle=line; g.beginPath(); g.moveTo(L,y+0.5); g.lineTo(L+pw,y+0.5); g.stroke();
+    g.fillText('10'+String(e).split('').map(c=>SUP[c]).join(''),L-5,y); }
+  g.textAlign='center'; g.textBaseline='top';
+  for(const t of o.xticks){ g.fillText(o.xfmt(t),X(t),T+ph+5); }
+  g.setLineDash([3,3]); g.strokeStyle=muted;
+  for(const v of (o.vlines||[])){ if(v<o.xmin||v>o.xmax) continue; g.beginPath(); g.moveTo(X(v)+0.5,T); g.lineTo(X(v)+0.5,T+ph); g.stroke(); }
+  g.setLineDash([]);
+  g.strokeStyle=acc; g.lineWidth=1.5; g.beginPath();
+  pts.forEach((p,i)=>{ const x=X(p[0]), y=Y(p[1]); if(i) g.lineTo(x,y); else g.moveTo(x,y); }); g.stroke();
+  g.fillStyle=ink; g.textAlign='left'; g.textBaseline='top'; g.fillText(o.xlabel,L+6,T+4);
+}
+let prof=null, profBusy=false, lastProf=0;
+function requestProfiles(now){
+  if(profBusy || now-lastProf<500 || !backend.readSK) return;
+  const p=backend.readSK(); if(!p) return;
+  profBusy=true; lastProf=now; const g=gen, N=S.N;
+  p.then(sk=>{ profBusy=false; if(!sk||g!==gen||N!==S.N) return; prof=computeProfiles(sk,N,S.Q.slice(0,S.nm).map(q=>q*N*DX/(2*Math.PI))); drawProfiles(); },
+         ()=>{ profBusy=false; });
+}
+function drawProfiles(){
+  if(!prof) return;
+  const N=S.N, dk=2*Math.PI/(N*DX), q0=q0For(S.fd), kmax=Math.min(S.kmax, Math.PI/DX);
+  const ks=prof.rad.map((_,i)=>(i+1)*dk);
+  const step=kmax>2.5?1:0.5, ticks=[]; for(let t=0;t<=kmax+1e-9;t+=step) ticks.push(t);
+  drawLogPlot($('#radplot'),ks,prof.rad,{xmin:0,xmax:kmax,decades:S.decades,xticks:ticks,xfmt:t=>String(t),vlines:S.Q.slice(0,S.nm),xlabel:'|k| →'});
+  $('#rad-meta').textContent = prof.pk ? `peak k = ${(prof.pk*dk).toFixed(3)}, width ${prof.fw!=null?(prof.fw*dk).toFixed(3):'–'}` : '';
+  drawLogPlot($('#azplot'),prof.az.map((_,i)=>i*3+1.5),prof.az,{xmin:0,xmax:360,decades:Math.min(S.decades,4),xticks:[0,60,120,180,240,300,360],xfmt:t=>t+'°',xlabel:'θ →'});
+  $('#az-meta').textContent = prof.contrast<3 ? 'no distinct spots (ring)'
+    : `${prof.spots} spot${prof.spots===1?'':'s'}, mean width ${prof.meanW.toFixed(0)}°`;
+}
+window.addEventListener('resize',drawProfiles);
+
+/* ---------- UI ---------- */
+function bindRange(id,key,fmt,onchange){
+  const el=$('#'+id), out=$('#v-'+id);
+  const upd=()=>{ S[key]=parseFloat(el.value); out.textContent=fmt(S[key]); };
+  el.addEventListener('input',()=>{ upd(); if(onchange && backend && !starting) onchange(); });
+  upd();
+}
+const f2=v=>v.toFixed(2);
+bindRange('r','r',f2,()=>modelChanged());
+bindRange('pb','psibar',f2,()=>backend.setPsibar(S.psibar));
+bindRange('amp','A',f2);
+bindRange('heat','brushAmp',f2);
+bindRange('dt','dt',f2,rebuildCoefs);
+bindRange('spf','spf',v=>String(v|0));
+bindRange('range','range',v=>'± '+v.toFixed(2));
+
+$('#grid').addEventListener('change',async e=>{
+  if(!backend || starting) return;
+  S.N=+e.target.value; starting=true;
+  try{ await backend.init(S.N); } catch(err){ console.warn(err); starting=false; S.engine='cpu32'; $('#engine').value='cpu32'; return start(); }
+  starting=false; Clevel=null; quench();
+});
+$('#engine').addEventListener('change',e=>{ S.engine=e.target.value; note(''); start(); });
+Object.assign(S,{fourier:false,kmax:2.5,kavg:0.2,decades:6,rings:true,vacFrac:3});
+document.querySelectorAll('input[name=view]').forEach(el=>el.addEventListener('change',()=>{
+  S.fourier = document.querySelector('input[name=view]:checked').value==='fourier';
+  $('#cv').setAttribute('aria-label', S.fourier ? 'Structure factor of ψ on a log scale' : 'Density field ψ');
+}));
+$('#kzoom').addEventListener('change',e=>{ S.kmax=+e.target.value; });
+$('#kavg').addEventListener('change',e=>{ S.kavg=+e.target.value; });
+$('#rings').addEventListener('change',e=>{ S.rings=e.target.checked; });
+bindRange('dec','decades',v=>v.toFixed(1));
+
+bindRange('vac','vacFrac',v=>v.toFixed(1)+'%');
+function seedTarget(){
+  const f=seedTargetField(S.N), NN=S.N*S.N, re=Float64Array.from(f), im=new Float64Array(NN); getFFT(S.N).f2(re,im,1);
+  const spec=new Float64Array(2*NN); let m=0; for(let i=0;i<NN;i++){ spec[2*i]=re[i]/NN; spec[2*i+1]=im[i]/NN; if(f[i]*f[i]>m) m=f[i]*f[i]; }
+  spec[0]=S.psibar; spec[1]=0; resetRun(spec,m);
+}
+$('#b-xtal').addEventListener('click',()=>{ if(backend && !starting){ note(''); seedTarget(); } });
+$('#b-vac').addEventListener('click',()=>{ if(backend && !starting){
+  pendingVac={conc:S.vacFrac/100, pb:S.psibar, seed:S.seed, event:vacEvent++};
+} });
+function readSeed(){
+  const v=Math.floor(Number($('#seed').value));
+  S.seed = Number.isFinite(v) ? ((v%4294967296)+4294967296)%4294967296 : 0;
+  $('#seed').value=String(S.seed);
+}
+$('#b-quench').addEventListener('click',()=>{ if(backend && !starting){ note(''); readSeed(); quench(); } });
+$('#b-seed').addEventListener('click',()=>{ $('#seed').value=String((Math.random()*4294967296)>>>0); if(backend && !starting){ note(''); readSeed(); quench(); } });
+$('#seed').addEventListener('change',()=>{ readSeed(); if(backend && !starting){ note(''); quench(); } });
+$('#b-pause').addEventListener('click',e=>{ S.paused=!S.paused; e.target.textContent=S.paused?'Resume':'Pause'; });
+
+/* ---------- lattice picture ---------- */
+const SUB=['₁','₂','₃','₄'];
+function prepCanvas(cv){
+  const dpr=window.devicePixelRatio||1, W=cv.clientWidth, H=cv.clientHeight;
+  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){ cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); }
+  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
+  const cs=getComputedStyle(document.documentElement), c=k=>cs.getPropertyValue(k).trim();
+  g.font='12px "Instrument Sans", system-ui, sans-serif';
+  return {g,W,H,ink:c('--ink'),muted:c('--muted'),line:c('--line'),acc:c('--accent'),warn:c('--warn')};
+}
+function arrow(g,x0,y0,x1,y1,col){
+  g.strokeStyle=col; g.fillStyle=col; g.lineWidth=2; g.beginPath(); g.moveTo(x0,y0); g.lineTo(x1,y1); g.stroke();
+  const a=Math.atan2(y1-y0,x1-x0), h=8; g.beginPath(); g.moveTo(x1,y1);
+  g.lineTo(x1-h*Math.cos(a-0.4),y1-h*Math.sin(a-0.4)); g.lineTo(x1-h*Math.cos(a+0.4),y1-h*Math.sin(a+0.4)); g.closePath(); g.fill();
+}
+function drawLattice(){
+  const Qs=S.Q.slice(0,S.nm), L=latticeBasis(S.lattice,S.rho,Math.min(...Qs));
+  // real space
+  { const {g,W,H,ink,muted,line,acc}=prepCanvas($('#realcv')); if(W){
+    const amax=S.lattice==='stripe'?Math.hypot(...L.a1):Math.max(Math.hypot(...L.a1),Math.hypot(...L.a2));
+    const sc=W/(4.2*amax), cx=W/2, cy=H/2, P=(u,v)=>[cx+u*sc, cy-v*sc];
+    g.lineWidth=1;
+    if(S.lattice==='stripe'){
+      g.strokeStyle=ink; g.lineWidth=3; const a=L.a1[0];
+      for(let n=-4;n<=4;n++){ const [x]=P(n*a,0); g.beginPath(); g.moveTo(x,6); g.lineTo(x,H-6); g.stroke(); }
+      arrow(g,...P(0,0),...P(L.a1[0],L.a1[1]),acc); g.fillStyle=acc; const [lx,ly]=P(L.a1[0]/2,0); g.fillText('a₁',lx-6,ly-8);
+      $('#real-cap').textContent=`Stripes, period ${a.toFixed(2)} = 2π/Q₁.`;
+    } else {
+      const R=8; g.setLineDash([4,4]); g.strokeStyle=muted;
+      for(let n=-R;n<=R;n++){  // lattice lines along a1 and along a2
+        for(const [d,o] of [[L.a1,L.a2],[L.a2,L.a1]]){ const [x0,y0]=P(n*o[0]-R*d[0], n*o[1]-R*d[1]), [x1,y1]=P(n*o[0]+R*d[0], n*o[1]+R*d[1]);
+          g.beginPath(); g.moveTo(x0,y0); g.lineTo(x1,y1); g.stroke(); } }
+      g.setLineDash([]); g.fillStyle=ink;
+      const rad=Math.max(3,Math.min(9,0.12*Math.hypot(...L.a1)*sc));
+      for(let i=-R;i<=R;i++) for(let j=-R;j<=R;j++) for(const [u,v] of L.basis){
+        const X=(i+u)*L.a1[0]+(j+v)*L.a2[0], Y=(i+u)*L.a1[1]+(j+v)*L.a2[1], [x,y]=P(X,Y);
+        if(x<-rad||x>W+rad||y<-rad||y>H+rad) continue; g.beginPath(); g.arc(x,y,rad,0,2*Math.PI); g.fill(); }
+      arrow(g,...P(0,0),...P(L.a1[0],L.a1[1]),acc); arrow(g,...P(0,0),...P(L.a2[0],L.a2[1]),acc);
+      g.fillStyle=acc; g.font='600 13px "Instrument Sans", system-ui, sans-serif';
+      const [x1,y1]=P(L.a1[0]*0.55,L.a1[1]*0.55); g.fillText('a₁',x1-4,y1+16);
+      const [x2,y2]=P(L.a2[0]*0.55,L.a2[1]*0.55); g.fillText('a₂',x2-18,y2);
+      const ang=Math.acos((L.a1[0]*L.a2[0]+L.a1[1]*L.a2[1])/(Math.hypot(...L.a1)*Math.hypot(...L.a2)))*180/Math.PI;
+      $('#real-cap').textContent=`|a₁| = ${Math.hypot(...L.a1).toFixed(2)}, |a₂| = ${Math.hypot(...L.a2).toFixed(2)}, angle ${ang.toFixed(0)}°`+(S.lattice==='honey'?', two sites per cell.':'.');
+    }
+  }}
+  // reciprocal space
+  { const {g,W,H,ink,muted,line,acc}=prepCanvas($('#recipcv')); if(W){
+    const kmax=Math.max(...Qs)*1.3, sc=(W/2-14)/kmax, cx=W/2, cy=H/2;
+    g.setLineDash([5,4]); g.lineWidth=1.25;
+    const pts=reciprocalPoints(L,kmax), hit=new Array(S.nm).fill(0);
+    for(const p of pts){ const i=onRing(p[2]); if(i>=0) hit[i]++; }
+    Qs.forEach((Q,i)=>{ g.strokeStyle=hit[i]?acc:muted; g.beginPath(); g.arc(cx,cy,Q*sc,0,2*Math.PI); g.stroke(); });
+    g.setLineDash([]); g.strokeStyle=line; g.beginPath(); g.moveTo(cx-6,cy); g.lineTo(cx+6,cy); g.moveTo(cx,cy-6); g.lineTo(cx,cy+6); g.stroke();
+    let on=0;
+    for(const [gx,gy,gg] of pts){ const x=cx+gx*sc, y=cy-gy*sc, i=onRing(gg);
+      if(i>=0){ on++; g.fillStyle=acc; g.beginPath(); g.arc(x,y,4.5,0,2*Math.PI); g.fill(); }
+      else { g.strokeStyle=muted; g.lineWidth=1; g.beginPath(); g.arc(x,y,3,0,2*Math.PI); g.stroke(); } }
+    g.fillStyle=muted; g.font='12px "Instrument Sans", system-ui, sans-serif';
+    Qs.forEach((Q,i)=>{ const a=-Math.PI/4+i*0.22; g.fillText('Q'+SUB[i],cx+Q*sc*Math.cos(a)+3,cy+Q*sc*Math.sin(a)-3); });
+    const empty=Qs.map((Q,i)=>hit[i]?null:'Q'+SUB[i]).filter(Boolean);
+    $('#recip-cap').textContent=`${on} reciprocal points on favoured rings (filled).`+(empty.length?` No lattice points on ${empty.join(', ')}.`:'');
+  }}
+}
+function buildModes(){
+  const root=$('#modes'); root.innerHTML='<span class="mh">Mode</span><span class="mh">Qᵢ</span><span class="mh">weight bᵢ</span>';
+  for(let i=0;i<S.nm;i++){
+    const lab=document.createElement('span'); lab.textContent='Q'+SUB[i];
+    const q=document.createElement('input'); q.type='number'; q.step='0.001'; q.min='0.2'; q.max='3'; q.value=S.Q[i].toFixed(4); q.setAttribute('aria-label','Q'+SUB[i]);
+    const b=document.createElement('input'); b.type='number'; b.step='0.01'; b.min='0'; b.max='2'; b.value=String(S.b[i]); b.setAttribute('aria-label','b'+SUB[i]);
+    q.addEventListener('change',()=>{ const v=+q.value; if(v>=0.2&&v<=3){ S.Q[i]=v; modelChanged(); } else q.value=S.Q[i].toFixed(4); });
+    b.addEventListener('change',()=>{ const v=+b.value; if(v>=0&&v<=2){ S.b[i]=v; modelChanged(); } else b.value=String(S.b[i]); });
+    root.append(lab,q,b);
+  }
+}
+function fitModes(){
+  const L=latticeBasis(S.lattice,S.rho,1), sh=shellList(L,S.nm);
+  for(let i=0;i<S.nm;i++) S.Q[i]= sh[i]!=null ? sh[i] : S.Q[i];
+  buildModes(); modelChanged();
+}
+const PRESETS={
+  square:{nm:2,Q:[1,Math.SQRT2],b:[0,0],r:-0.5,pb:-0.45,lam:1,g:0,hint:'Verified headless: with rings at 1 and √2, square has lower free energy than triangular, stripes and uniform.'},
+  tri:{nm:1,Q:[1],b:[0],r:-0.25,pb:-0.25,lam:1,g:0,hint:'One mode: the standard PFC operator. Triangular wins at negative ψ̄.'},
+  honey:{nm:1,Q:[1],b:[0],r:-0.25,pb:0.25,lam:1,g:0,hint:'One mode at positive ψ̄: the density maxima form a honeycomb (the inverse of the triangular pattern).'},
+  stripe:{nm:1,Q:[1],b:[0],r:-0.25,pb:0,lam:1,g:0,hint:'One mode at ψ̄ = 0: stripes.'},
+  rect:{nm:3,Q:null,b:[0,0,0],r:-0.8,pb:-0.55,lam:1,g:0,hint:'Exploratory: in headless tests a triangular lattice on one of these rings always won. Try the weights bᵢ, λ and ψ̄ to look for a rectangular window.'}
+};
+function setSlider(id,key,val,fmt){ S[key]=val; $('#'+id).value=String(val); $('#v-'+id).textContent=fmt(val); }
+function applyPreset(seed=true){
+  const P=PRESETS[S.lattice];
+  S.nm=P.nm; $('#nmodes').value=String(P.nm);
+  if(P.Q){ P.Q.forEach((q,i)=>S.Q[i]=q); } else { const sh=shellList(latticeBasis(S.lattice,S.rho,1),P.nm); sh.forEach((q,i)=>S.Q[i]=q); }
+  P.b.forEach((v,i)=>S.b[i]=v);
+  setSlider('r','r',P.r,f2); setSlider('pb','psibar',P.pb,f2); setSlider('lam','lam',P.lam,f2); setSlider('gc','g',P.g,f2);
+  $('#preset-hint').textContent=P.hint;
+  buildModes(); modelChanged();
+  if(seed && backend && !starting){ note(''); seedTarget(); }
+}
+function syncLatticeUI(){ $('#rho').disabled = S.lattice!=='rect'; $('#preset-hint').textContent=PRESETS[S.lattice].hint; }
+$('#lattice').addEventListener('change',e=>{ S.lattice=e.target.value; syncLatticeUI(); drawLattice(); });
+bindRange('rho','rho',v=>v.toFixed(2),()=>drawLattice());
+$('#rho').addEventListener('input',()=>{ if(!backend) drawLattice(); });
+$('#nmodes').addEventListener('change',e=>{ S.nm=+e.target.value; buildModes(); modelChanged(); });
+$('#b-fit').addEventListener('click',fitModes);
+$('#b-preset').addEventListener('click',()=>applyPreset(true));
+bindRange('lam','lam',f2,()=>modelChanged());
+bindRange('gc','g',f2,()=>modelChanged());
+window.addEventListener('resize',drawLattice);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawLattice);
+buildModes(); syncLatticeUI(); drawLattice();
+
+const field=$('#field');
+function setPos(e){
+  const r=$('#cv').getBoundingClientRect();
+  const cl=v=>Math.min(Math.max(v,0),S.N-1e-3);
+  pointer.cx=cl((e.clientX-r.left)/r.width*S.N); pointer.cy=cl((e.clientY-r.top)/r.height*S.N);
+}
+field.addEventListener('pointerdown',e=>{ pointer.down=true; field.setPointerCapture(e.pointerId); setPos(e); });
+field.addEventListener('pointermove',e=>{ if(pointer.down) setPos(e); });
+['pointerup','pointercancel','lostpointercapture'].forEach(t=>field.addEventListener(t,()=>{ pointer.down=false; }));
+
+start().then(()=>{ applyPreset(true); requestAnimationFrame(loop); });
+</script>
+<script src="../../shared/record.js" data-canvas="realcv"></script>
+</body>
+</html>

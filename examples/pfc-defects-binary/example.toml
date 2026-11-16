@@ -1,0 +1,38 @@
+[meta]
+name   = "pfc-defects-binary"
+order  = 110
+title  = "Binary PFC: grain boundaries and sublattice walls"
+status = "active"
+tags   = ["PFC","binary","defects","grain-boundary","spectral","interactive"]
+
+[example]
+method  = "PFC"
+runtime = "browser-js"
+entry   = "index.html"
+thumb   = "thumb.webp"
+blurb   = "Two-species PFC crystals with grain boundaries and sublattice (antiphase) walls between ordered domains."
+default_variant = 0
+
+[provenance]
+notes = "Prototyped in .sandbox/Binary PFC gallery.html. No pfc-models catalogue entry yet; catalogue fields left empty."
+
+[[variants]]
+model     = "binarypfc"
+backend   = "webgpu"
+precision = "float32"
+catalogue = ""
+status    = "active"
+
+[[variants]]
+model     = "binarypfc"
+backend   = "js-cpu"
+precision = "float32"
+catalogue = ""
+status    = "active"
+
+[[variants]]
+model     = "binarypfc"
+backend   = "js-cpu"
+precision = "float64"
+catalogue = ""
+status    = "active"

@@ -1,0 +1,38 @@
+[meta]
+name   = "pfc-lattices-multimode"
+order  = 30
+title  = "Multi-mode PFC: lattices from chosen wavenumbers"
+status = "active"
+tags   = ["PFC","multi-mode","crystal-structure","spectral","interactive"]
+
+[example]
+method  = "PFC"
+runtime = "browser-js"
+entry   = "index.html"
+thumb   = "thumb.webp"
+blurb   = "Pick the wavenumbers in a multi-mode PFC kernel and see which lattice crystallizes, in real and reciprocal space."
+default_variant = 0
+
+[provenance]
+notes = "Prototyped in .sandbox/Multi-mode PFC_ lattices from chosen wavenumbers.html. No pfc-models catalogue entry yet; catalogue fields left empty."
+
+[[variants]]
+model     = "multimodepfc"
+backend   = "webgpu"
+precision = "float32"
+catalogue = ""
+status    = "active"
+
+[[variants]]
+model     = "multimodepfc"
+backend   = "js-cpu"
+precision = "float32"
+catalogue = ""
+status    = "active"
+
+[[variants]]
+model     = "multimodepfc"
+backend   = "js-cpu"
+precision = "float64"
+catalogue = ""
+status    = "active"

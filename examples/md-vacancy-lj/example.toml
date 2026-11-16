@@ -1,0 +1,24 @@
+[meta]
+name   = "md-vacancy-lj"
+order  = 200
+title  = "Vacancy walk in a Lennard-Jones raft"
+status = "active"
+tags   = ["MD","Lennard-Jones","vacancy","diffusion","interactive"]
+
+[example]
+method  = "MD"
+runtime = "browser-js"
+entry   = "index.html"
+thumb   = "thumb.webp"
+blurb   = "Velocity-Verlet MD of a 2D Lennard-Jones raft with one vacancy; track its random walk and mean squared displacement across temperatures."
+default_variant = 0
+
+[provenance]
+notes = "Prototyped in .sandbox/lj-vacancy-raft.html. Non-PFC example; no catalogue entry."
+
+[[variants]]
+model     = "lj"
+backend   = "js-cpu"
+precision = "float64"
+catalogue = ""
+status    = "active"
